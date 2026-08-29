@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🌿 Digital To-Do &amp; Wellness Manager
-### CSA-0801: Python Programming Major Project & Academic Suite
+### Full-Stack Task Management & Active Health Tracking Web Application
 
 [![Python Version](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-6.1%20%2F%205.1-092E20.svg?logo=django&logoColor=white)](https://www.djangoproject.com/)
@@ -10,7 +10,7 @@
 [![PWA](https://img.shields.io/badge/PWA-Ready%20%2F%20Offline%20Cache-5A0FC8.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-*A full-stack, production-ready Python web application that combines ultra-fast task management with active health, hydration tracking, medication adherence regimens, background Celery notifications, and visual analytics dashboards.*
+*A production-ready full-stack Python web application that combines streamlined task execution with proactive health monitoring, hydration tracking, medication adherence regimens, background Celery notifications, and visual analytics dashboards.*
 
 </div>
 
@@ -71,42 +71,44 @@
 CSA-0801-Python-programming/
 ├── apps/                                  # Django Pluggable Applications
 │   ├── accounts/                          # User authentication, profiles, & preferences
+│   ├── calendar_sync/                     # iCalendar (.ics) exports, Google Calendar sync
 │   ├── dashboard/                         # Central dashboard, Chart.js stats, & KPI views
 │   ├── health/                            # Hydration logging, medication schedules, wellness tips
 │   ├── reminders/                         # Celery periodic jobs, push notifications, chimes
 │   └── tasks/                             # Task CRUD, tags, filters, NLP parsing, & ICS exports
 ├── core/                                  # Project Configuration & Settings
-│   ├── settings.py                        # Django configuration (SQLite/MySQL toggles)
+│   ├── settings.py                        # Django configuration (SQLite/MySQL dual support)
 │   ├── urls.py                            # Root URL routing
 │   ├── celery.py                          # Celery application & beat scheduler setup
 │   ├── wsgi.py / asgi.py                  # Web server gateway interfaces
+│   └── __init__.py                        # Core package initialization
 ├── fixtures/                              # Seed datasets
 │   └── wellness_tips.json                 # Initial wellness & hydration tips pool
 ├── static/                                # Static assets
 │   ├── css/style.css                      # Custom theme, animations & responsive styles
+│   ├── icons/                             # PWA application icons (192x192, 512x512)
 │   ├── js/app.js                          # AJAX toggles, Web Audio chime, NLP parser
 │   ├── js/charts.js                       # Chart.js analytics graphs
 │   ├── js/sw.js                           # Service worker for offline PWA
 │   └── manifest.json                      # Web App Manifest
 ├── templates/                             # HTML5 Django Templates
+│   ├── accounts/                          # Login, signup, password reset, profile
 │   ├── base.html                          # Root master layout
+│   ├── calendar_sync/                     # Google Calendar sync settings
+│   ├── components/                        # Navbars, PWA banners, audio notifications
 │   ├── dashboard/                         # Dashboard & downloadable reports
 │   ├── health/                            # Hydration & medication management
-│   ├── tasks/                             # Task lists, quick-add modal, filters
-│   └── components/                        # Navbars, PWA banners, audio notifications
-├── 01_basics_and_control_flow/            # CSA-0801 Unit 1 Labs
-├── 02_data_structures/                    # CSA-0801 Unit 2 Labs (Stack, Linked List, BST)
-├── 03_object_oriented_programming/        # CSA-0801 Unit 3 Labs (OOP & Design Patterns)
-├── 04_file_handling_and_exceptions/       # CSA-0801 Unit 4 Labs (CSV/JSON & Exceptions)
-├── 05_modules_and_standard_lib/           # CSA-0801 Unit 5 Labs (Concurrency & Pathlib)
-├── 06_database_operations/                # CSA-0801 Unit 6 Labs (SQLite3 DDL & CRUD)
-├── 07_gui_applications/                   # CSA-0801 Unit 7 Labs (Tkinter Desktop GUIs)
-├── 08_capstone_project/                   # CSA-0801 Unit 8 Desktop & Terminal Suite
-├── tests/                                 # Automated Test Suite (Django + Course Labs)
+│   ├── offline.html                       # PWA offline fallback template
+│   └── tasks/                             # Task lists, quick-add modal, filters
+├── tests/                                 # Automated Test Suite
+│   ├── test_calendar_sync.py              # Calendar export & sync tests
+│   ├── test_health.py                     # Hydration & medication tests
+│   ├── test_reminders.py                  # Reminder & Celery task tests
+│   └── test_tasks.py                      # Task CRUD & NLP parser tests
 ├── manage.py                              # Django CLI management script
-├── run_lab.py                             # Interactive CLI Lab Navigator
 ├── requirements.txt                       # Full Python dependencies
 ├── .env.example                           # Sample environment configuration
+├── .gitignore                             # Git ignore rules
 ├── LICENSE                                # MIT License
 └── README.md                              # Complete documentation
 ```
@@ -143,11 +145,11 @@ python manage.py loaddata fixtures/wellness_tips.json
 python manage.py createsuperuser
 ```
 
-### 5. Launch the Web Application
+### 5. Launch the Development Server
 ```bash
 python manage.py runserver
 ```
-Visit **`http://127.0.0.1:8000/`** in your browser to access the Digital To-Do & Wellness Manager!
+Open **`http://127.0.0.1:8000/`** in your browser!
 
 ### 6. (Optional) Run Celery Background Worker & Beat
 ```bash
@@ -157,40 +159,26 @@ celery -A core worker -l info
 # Terminal 2: Celery Beat Scheduler
 celery -A core beat -l info
 ```
-*(Note: If Redis is not running locally, setting `CELERY_TASK_ALWAYS_EAGER = True` in `.env` executes background tasks synchronously for hassle-free local development).*
+*(Note: If Redis is not running locally, setting `CELERY_TASK_ALWAYS_EAGER = True` in `.env` executes background tasks synchronously).*
 
 ---
 
 ## 🧪 Running Automated Tests
 
-Run the full automated test suite covering all Django apps and coursework modules:
+Run the test suite across all modules:
 
 ```bash
-# Run all tests via pytest:
-pytest
-
-# Or run Django tests:
+# Run tests with Django test runner:
 python manage.py test tests/
 
-# Or run CSA-0801 lab suite tests:
-python run_lab.py --test
+# Or using pytest:
+pytest
 ```
 
 ---
 
-## 🕹️ Interactive Lab Navigator (`run_lab.py`)
-
-In addition to the full-stack web application, this repository includes the complete modular Python programming curriculum. You can launch the interactive terminal navigator at any time:
-
-```bash
-python run_lab.py
-```
-
----
-
-## 📄 License & Academic Integrity
+## 📄 License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
-Developed by **Nikhil Karnati** for **CSA-0801: Python Programming**.
-Designed for computer science students, educators, and software engineers seeking a production-ready reference codebase.
+Developed by **Nikhil Karnati**.

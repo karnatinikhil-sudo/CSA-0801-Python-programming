@@ -1,0 +1,194 @@
+[
+  {
+    "model": "health.wellnesstip",
+    "pk": 1,
+    "fields": {
+      "title": "Drink a Glass of Water",
+      "tip_text": "Staying hydrated boosts focus, prevents afternoon fatigue, and keeps your energy sharp.",
+      "category": "HYDRATION",
+      "action_label": "Log 1 Glass 💧",
+      "icon": "bi-droplet-half",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 2,
+    "fields": {
+      "title": "20-20-20 Eye Break",
+      "tip_text": "Every 20 minutes, look at an object 20 feet away for 20 seconds to prevent digital eye strain.",
+      "category": "EYES",
+      "action_label": "Rested Eyes 👀",
+      "icon": "bi-eye",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 3,
+    "fields": {
+      "title": "Shoulder & Neck Roll",
+      "tip_text": "Roll your shoulders backward 5 times and gently tilt your neck side to side to release muscle tension.",
+      "category": "POSTURE",
+      "action_label": "Stretched 🧘",
+      "icon": "bi-person-arms-up",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 4,
+    "fields": {
+      "title": "Quick Stand & 2-Min Walk",
+      "tip_text": "Stand up and walk around your room or hallway for 2 minutes to reboot your blood circulation.",
+      "category": "MOVEMENT",
+      "action_label": "Walked 🚶",
+      "icon": "bi-lightning-charge",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 5,
+    "fields": {
+      "title": "4-7-8 Deep Breathing",
+      "tip_text": "Inhale quietly for 4s, hold breath for 7s, exhale completely for 8s. Resets your nervous system.",
+      "category": "BREATH",
+      "action_label": "Deep Breath In 🌬️",
+      "icon": "bi-wind",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 6,
+    "fields": {
+      "title": "Desk Posture Check",
+      "tip_text": "Keep your feet flat on the floor, relax your shoulders, and ensure top of monitor is at eye level.",
+      "category": "POSTURE",
+      "action_label": "Adjusted Posture 🪑",
+      "icon": "bi-person-check",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 7,
+    "fields": {
+      "title": "Wrist & Finger Stretches",
+      "tip_text": "Extend your arm forward and gently pull your fingers back with opposite hand for 15s each.",
+      "category": "MOVEMENT",
+      "action_label": "Wrists Relaxed ✋",
+      "icon": "bi-hand-index",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 8,
+    "fields": {
+      "title": "Hydrate Before Coffee or Tea",
+      "tip_text": "Drink a glass of plain water before your next caffeine refill to prevent caffeine-induced dehydration.",
+      "category": "HYDRATION",
+      "action_label": "Drank Water 💧",
+      "icon": "bi-cup-hot",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 9,
+    "fields": {
+      "title": "Blink Rapidly for 10 Seconds",
+      "tip_text": "We blink 66% less while staring at screens. Deliberately blinking re-moisturizes your eyes.",
+      "category": "EYES",
+      "action_label": "Blinked & Refreshed ✨",
+      "icon": "bi-brightness-high",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 10,
+    "fields": {
+      "title": "Spine Twist in Chair",
+      "tip_text": "Sit tall, place right hand on back of chair, and gently twist right for 10s. Repeat on left.",
+      "category": "POSTURE",
+      "action_label": "Twisted Spine 🔄",
+      "icon": "bi-arrow-repeat",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 11,
+    "fields": {
+      "title": "Calf Raises While Standing",
+      "tip_text": "Do 15 gentle calf raises while waiting for a page or coffee. Pumps blood back to your heart.",
+      "category": "MOVEMENT",
+      "action_label": "Done 15 Raises 🏃",
+      "icon": "bi-speedometer2",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 12,
+    "fields": {
+      "title": "Mental Reset: Box Breathing",
+      "tip_text": "Breathe in 4s, hold 4s, exhale 4s, hold 4s. 3 rounds quickly calms deadline stress.",
+      "category": "BREATH",
+      "action_label": "Mind Cleared 🧠",
+      "icon": "bi-heart-pulse",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 13,
+    "fields": {
+      "title": "Electrolyte Check",
+      "tip_text": "If you feel a sluggish headache after long coding sessions, drink water with a pinch of lemon or salt.",
+      "category": "HYDRATION",
+      "action_label": "Noted 🍋",
+      "icon": "bi-droplet",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 14,
+    "fields": {
+      "title": "Unclench Your Jaw & Shoulders",
+      "tip_text": "Notice if your teeth are pressed together or shoulders hunched. Drop your tongue from roof of mouth.",
+      "category": "POSTURE",
+      "action_label": "Jaw Relaxed 😊",
+      "icon": "bi-emoji-smile",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 15,
+    "fields": {
+      "title": "Look Outside a Window",
+      "tip_text": "Natural daylight and distant greenery reset your circadian rhythm and reduce visual fatigue.",
+      "category": "EYES",
+      "action_label": "Looked Outside 🌳",
+      "icon": "bi-sun",
+      "is_active": true
+    }
+  },
+  {
+    "model": "health.wellnesstip",
+    "pk": 16,
+    "fields": {
+      "title": "Drink a Glass of Cool Water",
+      "tip_text": "A cool glass of water triggers a gentle thermogenic wakefulness response.",
+      "category": "HYDRATION",
+      "action_label": "Drank Cold Water 🧊",
+      "icon": "bi-snow",
+      "is_active": true
+    }
+  }
+]

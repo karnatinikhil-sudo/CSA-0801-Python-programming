@@ -1,0 +1,71 @@
+{% if user.is_authenticated %}
+<!-- Mobile Quick Add Bottom Sheet Modal -->
+<div class="modal fade mobile-sheet-modal" id="mobileQuickAddModal" tabindex="-1" aria-labelledby="mobileQuickAddModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="p-2 rounded-3 bg-primary-subtle text-primary">
+                        <i class="bi bi-plus-circle-fill fs-5"></i>
+                    </div>
+                    <h5 class="modal-title fw-bold" id="mobileQuickAddModalLabel">Quick Add Task</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <form id="mobile-quick-task-form">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Task Description</label>
+                        <div class="input-group">
+                            <input type="text" id="mobile-quick-task-title" class="form-control form-control-lg rounded-3" placeholder="e.g. Call doctor tomorrow at 3pm #Health" required autocomplete="off">
+                        </div>
+                        <div class="form-text text-muted small mt-1">
+                            <i class="bi bi-magic text-primary me-1"></i> Auto-detects dates, times, categories (#Work), and priority!
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-muted">Due Date</label>
+                            <input type="date" id="mobile-quick-task-date" class="form-control rounded-3">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-muted">Due Time</label>
+                            <input type="time" id="mobile-quick-task-time" class="form-control rounded-3">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-muted">Priority</label>
+                            <select id="mobile-quick-task-priority" class="form-select rounded-3">
+                                <option value="LOW">🟢 Low</option>
+                                <option value="MEDIUM" selected>🟡 Medium</option>
+                                <option value="HIGH">🔴 High</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-muted">Category</label>
+                            <select id="mobile-quick-task-category" class="form-select rounded-3">
+                                <option value="Work" selected>💼 Work</option>
+                                <option value="Personal">🏠 Personal</option>
+                                <option value="Health">💊 Health</option>
+                                <option value="Fitness">🏃 Fitness</option>
+                                <option value="Finance">💳 Finance</option>
+                                <option value="Study">📚 Study</option>
+                                <option value="Other">🏷️ Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi bi-check2-circle fs-5"></i> Save Task
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Working Hours &amp; Preferences &bull; Digital To-Do &amp; Wellness Manager{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card-custom p-4 p-md-5 bg-white shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <div>
+                    <h3 class="fw-bold mb-0 text-dark"><i class="bi bi-person-gear text-primary me-2"></i>Profile &amp; Preferences</h3>
+                    <small class="text-muted">Configure your active hours, hydration intervals, and alarm preferences.</small>
+                </div>
+            </div>
+
+            <form method="POST" novalidate>
+                {% csrf_token %}
+
+                <!-- Personal Information -->
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-person-badge me-2"></i>Personal Info</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Email Address</label>
+                        {{ form.email }}
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- WHO Health & Demographic Metrics -->
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-heart-pulse text-danger me-2"></i>WHO Health &amp; Daily Schedule Guidelines</h5>
+                    <span class="badge bg-primary-subtle text-primary fw-semibold">WHO Standard</span>
+                </div>
+                <p class="text-muted small">Your age and busy work habits determine your optimal daily water intake, hydration schedule intervals, and vital health reminders.</p>
+                <div class="row g-3 mb-4 bg-light p-3 rounded-3">
+                    <div class="col-md-3 col-6">
+                        <label class="form-label fw-semibold">Your Age <span class="text-danger">*</span></label>
+                        {{ form.age }}
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <label class="form-label fw-semibold">Gender</label>
+                        {{ form.gender }}
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <label class="form-label fw-semibold">Weight (kg)</label>
+                        {{ form.weight_kg }}
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <label class="form-label fw-semibold">Work Habits</label>
+                        {{ form.activity_level }}
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Active Work Hours -->
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history me-2"></i>Active Work Hours</h5>
+                <p class="text-muted small">Hydration nudges and wellness breaks will only trigger during your configured active hours.</p>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Start of Active Hours</label>
+                        {{ form.active_hours_start }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">End of Active Hours</label>
+                        {{ form.active_hours_end }}
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Hydration & Wellness Settings -->
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-droplet-half text-info me-2"></i>Hydration &amp; Health Nudges</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Hydration Nudge Interval (Minutes)</label>
+                        {{ form.hydration_interval_minutes }}
+                        <div class="form-text">Default: 120 minutes (2 hours).</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Daily Water Goal (Glasses)</label>
+                        {{ form.water_daily_target }}
+                        <div class="form-text">Target number of glasses to drink daily.</div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Reminder & Alarm Settings -->
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-bell-fill text-warning me-2"></i>Reminders &amp; Alarm Chimes</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Gentle Reminder Window (Minutes Before Due)</label>
+                        {{ form.reminder_window_minutes }}
+                        <div class="form-text">Default: 30 minutes before task due time.</div>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center mt-4">
+                        <div class="form-check">
+                            {{ form.sound_alerts_enabled }}
+                            <label class="form-check-label fw-semibold" for="{{ form.sound_alerts_enabled.id_for_label }}">
+                                Enable Audible Alarm Chimes for Urgent Tasks &amp; Meds
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end pt-3 border-top">
+                    <button type="submit" class="btn btn-primary px-4 py-2 fw-bold rounded-pill">
+                        <i class="bi bi-save me-1"></i> Save Preferences
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

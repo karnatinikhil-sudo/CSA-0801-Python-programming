@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="grad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#grad512)"/>
+  <!-- Checkmark -->
+  <path d="M128 266 L202 341 L384 160" fill="none" stroke="#ffffff" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Health Droplet Accent -->
+  <circle cx="370" cy="350" r="48" fill="#10b981"/>
+  <path d="M370 324 C370 324 392 345 392 358 C392 370 382 380 370 380 C358 380 348 370 348 358 C348 345 370 324 370 324 Z" fill="#ffffff"/>
+</svg>

@@ -1,0 +1,156 @@
+<!-- Central Health & Wellness Spotlight Card -->
+<div class="wellness-spotlight-card p-4 mb-4" id="central-wellness-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <span class="p-2 rounded-circle bg-info text-white d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <i class="bi bi-heart-pulse-fill fs-5"></i>
+            </span>
+            <div>
+                <h4 class="fw-bold mb-0 text-dark">Health &amp; Wellness Spotlight</h4>
+                <small class="text-muted">Balancing your productivity with your wellbeing</small>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 mt-2 mt-sm-0">
+            <a href="{% url 'health:medicines' %}" class="btn btn-sm btn-outline-primary rounded-pill">
+                <i class="bi bi-gear-fill me-1"></i> Manage Health &amp; Meds
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- 1. Hydration & Daily Water Tracker (WHO Guidelines) -->
+        <div class="col-lg-6">
+            <div class="card-custom p-3 h-100 bg-white border">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="fw-bold text-dark d-flex align-items-center gap-2">
+                        <i class="bi bi-droplet-fill text-info fs-5"></i> Hydration Tracker
+                    </span>
+                    <span class="glass-counter-badge" id="water-count-display">
+                        <i class="bi bi-cup-straw"></i> {{ wellness.water_count }} / {{ wellness.water_target }} glasses
+                    </span>
+                </div>
+                
+                <!-- WHO Personalized Requirement Badge -->
+                <div class="p-2 mb-2 rounded-3 bg-info-subtle text-info-emphasis small d-flex align-items-center justify-content-between">
+                    <span>
+                        <i class="bi bi-award-fill me-1 text-info"></i>
+                        <strong>WHO Guideline:</strong> {{ wellness.who_liters }}L (~{{ wellness.who_glasses }} glasses) for Age {{ wellness.profile.age }}
+                    </span>
+                    <span class="badge bg-white text-info border">Every {{ wellness.adaptive_interval }}m</span>
+                </div>
+                
+                <!-- Water Progress Bar -->
+                <div class="progress mb-3" style="height: 10px; border-radius: 999px; background-color: #e0f2fe;">
+                    <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" id="water-progress-bar" role="progressbar" style="width: {{ wellness.water_percent }}%;" aria-valuenow="{{ wellness.water_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <button class="btn btn-info text-white glass-btn d-flex align-items-center gap-2" id="btn-log-water">
+                        <i class="bi bi-plus-circle-fill"></i> +1 Glass Drank
+                    </button>
+                    <span class="text-muted small">
+                        Active hours: {{ wellness.profile.active_hours_start|time:"H:i" }} - {{ wellness.profile.active_hours_end|time:"H:i" }}
+                    </span>
+                </div>
+
+                <!-- Rotating Wellness Tip Box -->
+                <div class="tip-bubble mt-3" id="wellness-tip-container">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="badge bg-info-subtle text-info fw-semibold" id="wellness-tip-category">
+                            {% if wellness.current_tip %}{{ wellness.current_tip.get_category_display }}{% else %}Posture &amp; Break{% endif %}
+                        </span>
+                        <button class="btn btn-sm btn-link text-decoration-none text-muted p-0" id="btn-next-tip" title="Next Wellness Tip">
+                            <i class="bi bi-arrow-repeat me-1"></i> Next Tip
+                        </button>
+                    </div>
+                    <strong class="d-block text-dark mb-1" id="wellness-tip-title">
+                        {% if wellness.current_tip %}{{ wellness.current_tip.title }}{% else %}Take a 20-second Eye Break{% endif %}
+                    </strong>
+                    <p class="text-muted small mb-2" id="wellness-tip-text">
+                        {% if wellness.current_tip %}{{ wellness.current_tip.tip_text }}{% else %}Every 20 minutes, look at an object 20 feet away to avoid digital eye strain.{% endif %}
+                    </p>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-light border text-muted px-3" onclick="snoozeToast('tip', 30)">
+                            <i class="bi bi-clock me-1"></i> Remind Later
+                        </button>
+                        <button class="btn btn-sm btn-outline-success px-3" id="btn-tip-action" onclick="showToastNotification({id: 'tip-done', title: 'Great Job! 🧘', message: 'You completed your wellness micro-break.', stage: 'GENTLE'})">
+                            <i class="bi bi-check2 me-1"></i> Done
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Medication Schedule & Adherence (Optional / Adaptive) -->
+        <div class="col-lg-6">
+            <div class="card-custom p-3 h-100 bg-white border">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold text-dark d-flex align-items-center gap-2">
+                        <i class="bi bi-capsule-pill text-success fs-5"></i> Medication &amp; Vitamins
+                    </span>
+                    {% if wellness.has_medicines %}
+                        <span class="badge bg-success-subtle text-success fw-bold px-2 py-1" id="med-adherence-summary">
+                            {{ wellness.adherence_summary }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                {% if wellness.has_medicines %}
+                    <p class="text-muted small mb-3">Today's scheduled doses. Tap to mark as taken or snooze.</p>
+                    
+                    <div class="list-group list-group-flush gap-2" style="max-height: 250px; overflow-y: auto;">
+                        {% for dose in wellness.todays_doses %}
+                            <div class="list-group-item border rounded-3 p-2 d-flex flex-wrap justify-content-between align-items-center {% if dose.status == 'TAKEN' %}bg-light text-muted{% endif %}" id="med-dose-{{ dose.medicine_id }}-{{ dose.time|cut:':' }}">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-alarm text-primary"></i>
+                                        <strong class="text-dark">{{ dose.name }}</strong>
+                                        <span class="badge bg-secondary-subtle text-secondary">{{ dose.dosage }}</span>
+                                    </div>
+                                    <div class="text-muted small">
+                                        Time: <strong>{{ dose.time }}</strong> {% if dose.notes %}&bull; {{ dose.notes }}{% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-1 mt-2 mt-sm-0">
+                                    {% if dose.status == 'TAKEN' %}
+                                        <span class="badge bg-success"><i class="bi bi-check2"></i> Taken</span>
+                                    {% elif dose.status == 'SKIPPED' %}
+                                        <span class="badge bg-secondary">Skipped</span>
+                                    {% else %}
+                                        <button class="btn btn-sm btn-success btn-med-action px-2 py-1" data-med-id="{{ dose.medicine_id }}" data-time="{{ dose.time }}" data-action="TAKEN" title="Mark Taken">
+                                            <i class="bi bi-check2"></i> Taken
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning text-dark btn-med-action px-2 py-1" data-med-id="{{ dose.medicine_id }}" data-time="{{ dose.time }}" data-action="SNOOZE" title="Snooze 15 min">
+                                            <i class="bi bi-alarm"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary btn-med-action px-2 py-1" data-med-id="{{ dose.medicine_id }}" data-time="{{ dose.time }}" data-action="SKIPPED" title="Skip Dose">
+                                            Skip
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="text-center py-3 text-muted">
+                                <i class="bi bi-check-circle fs-3 text-success d-block mb-1"></i>
+                                <span>All medication doses completed for today!</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <!-- Clean empty state for users who don't take medications -->
+                    <div class="text-center py-4 px-2">
+                        <div class="p-3 bg-light rounded-circle d-inline-flex text-muted mb-2">
+                            <i class="bi bi-capsule fs-2"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark">No medications added</h6>
+                        <p class="text-muted small mb-3">If you take daily vitamins, supplements or prescriptions, you can add them to get automatic reminders.</p>
+                        <a href="{% url 'health:medicine_create' %}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                            <i class="bi bi-plus-lg me-1"></i> Add Medication Schedule
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

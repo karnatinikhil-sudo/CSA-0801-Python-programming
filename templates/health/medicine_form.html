@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} &bull; Digital To-Do &amp; Wellness Manager{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card-custom p-4 p-md-5 bg-white shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <h3 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-capsule-pill text-success me-2"></i>
+                    {{ title }}
+                </h3>
+                <a href="{% url 'health:medicines' %}" class="btn btn-sm btn-outline-secondary rounded-pill">
+                    &larr; Back to Medications
+                </a>
+            </div>
+
+            <form method="POST" novalidate>
+                {% csrf_token %}
+
+                <!-- Medicine Name -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Medication or Supplement Name <span class="text-danger">*</span></label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="text-danger small mt-1">{{ form.name.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">e.g. Vitamin D3, Metformin, Omega 3 Fish Oil, Amoxicillin</div>
+                </div>
+
+                <!-- Dosage and Frequency -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Dosage <span class="text-danger">*</span></label>
+                        {{ form.dosage }}
+                        {% if form.dosage.errors %}
+                            <div class="text-danger small mt-1">{{ form.dosage.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">e.g. 500mg, 1 tablet, 10ml</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Frequency</label>
+                        {{ form.frequency }}
+                    </div>
+                </div>
+
+                <!-- Dose Schedule Times -->
+                <div class="card p-3 mb-4 bg-light border-0 rounded-3">
+                    <h6 class="fw-bold text-dark mb-2"><i class="bi bi-alarm-fill text-primary me-1"></i>Scheduled Dose Times</h6>
+                    <div class="row g-3">
+                        <div class="col-sm-4">
+                            <label class="form-label small fw-semibold">Dose Time 1</label>
+                            {{ form.time_1 }}
+                            {% if form.time_1.errors %}
+                                <div class="text-danger small mt-1">{{ form.time_1.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-sm-4" id="dose-time-2-container">
+                            <label class="form-label small fw-semibold">Dose Time 2</label>
+                            {{ form.time_2 }}
+                            {% if form.time_2.errors %}
+                                <div class="text-danger small mt-1">{{ form.time_2.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-sm-4" id="dose-time-3-container">
+                            <label class="form-label small fw-semibold">Dose Time 3</label>
+                            {{ form.time_3 }}
+                            {% if form.time_3.errors %}
+                                <div class="text-danger small mt-1">{{ form.time_3.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Start & End Date -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Start Date</label>
+                        {{ form.start_date }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">End Date <span class="text-muted fw-normal">(Leave blank if ongoing)</span></label>
+                        {{ form.end_date }}
+                    </div>
+                </div>
+
+                <!-- Notes / Instructions -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Special Instructions / Notes</label>
+                    {{ form.notes }}
+                    <div class="form-text">e.g. "Take with food", "Drink a full glass of water", "Before bed".</div>
+                </div>
+
+                <!-- Is Active -->
+                <div class="form-check mb-4">
+                    {{ form.is_active }}
+                    <label class="form-check-label fw-semibold" for="{{ form.is_active.id_for_label }}">
+                        Active schedule (Reminders enabled)
+                    </label>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <a href="{% url 'health:medicines' %}" class="btn btn-light text-muted">Cancel</a>
+                    <button type="submit" class="btn btn-success px-4 py-2 fw-bold rounded-pill">
+                        <i class="bi bi-check2-circle me-1"></i> Save Medication Schedule
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const freqSelect = document.getElementById('med-frequency-select');
+    const time2 = document.getElementById('dose-time-2-container');
+    const time3 = document.getElementById('dose-time-3-container');
+
+    function updateTimeVisibility() {
+        const val = freqSelect.value;
+        if (val === 'ONCE') {
+            if (time2) time2.style.display = 'none';
+            if (time3) time3.style.display = 'none';
+        } else if (val === 'TWICE') {
+            if (time2) time2.style.display = 'block';
+            if (time3) time3.style.display = 'none';
+        } else {
+            if (time2) time2.style.display = 'block';
+            if (time3) time3.style.display = 'block';
+        }
+    }
+
+    if (freqSelect) {
+        freqSelect.addEventListener('change', updateTimeVisibility);
+        updateTimeVisibility();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} &bull; Digital To-Do &amp; Wellness Manager{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card-custom p-4 p-md-5 bg-white shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <h3 class="fw-bold mb-0 text-dark">
+                    <i class="bi {% if task %}bi-pencil-square{% else %}bi-plus-circle-fill text-primary{% endif %} me-2"></i>
+                    {{ title }}
+                </h3>
+                <a href="{% url 'tasks:list' %}" class="btn btn-sm btn-outline-secondary rounded-pill">
+                    &larr; Back to Tasks
+                </a>
+            </div>
+
+            <form method="POST" novalidate>
+                {% csrf_token %}
+
+                <!-- Task Title -->
+                <div class="mb-4">
+                    <label for="task-title-input" class="form-label fw-bold">Task Name <span class="text-danger">*</span></label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.title.errors %}<i class="bi bi-info-circle me-1"></i>{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">Keep it clear and actionable (e.g. "Prepare client demo").</div>
+                </div>
+
+                <!-- Description / Notes -->
+                <div class="mb-4">
+                    <label for="task-desc-input" class="form-label fw-semibold">Notes &amp; Details <span class="text-muted fw-normal">(Optional)</span></label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.description.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Priority and Category -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="task-priority-input" class="form-label fw-semibold">Priority Level</label>
+                        {{ form.priority }}
+                        {% if form.priority.errors %}
+                            <div class="text-danger small mt-1">{{ form.priority.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">High priority triggers louder alarm notifications.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="task-category-input" class="form-label fw-semibold">Category</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="text-danger small mt-1">{{ form.category.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Due Date & Time -->
+                <div class="row g-3 mb-2">
+                    <div class="col-md-6">
+                        <label for="task-date-input" class="form-label fw-semibold">Due Date</label>
+                        {{ form.due_date }}
+                        {% if form.due_date.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.due_date.errors %}<i class="bi bi-exclamation-circle me-1"></i>{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="task-time-input" class="form-label fw-semibold">Due Time <span class="text-muted fw-normal">(Optional)</span></label>
+                        {{ form.due_time }}
+                        {% if form.due_time.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.due_time.errors %}<i class="bi bi-exclamation-circle me-1"></i>{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Two-Way Google Calendar / Task Conflict Banner -->
+                <div id="calendar-conflict-banner" style="display: none;"></div>
+
+                <!-- Recurrence & Status -->
+                <div class="row g-3 mb-4 mt-2">
+                    <div class="col-md-6">
+                        <label for="task-recurrence-input" class="form-label fw-semibold">Recurrence</label>
+                        {{ form.recurrence }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="task-status-input" class="form-label fw-semibold">Current Status</label>
+                        {{ form.status }}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <a href="{% url 'tasks:list' %}" class="btn btn-light text-muted">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4 py-2 fw-bold rounded-pill">
+                        <i class="bi bi-check2-circle me-1"></i> Save Task
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

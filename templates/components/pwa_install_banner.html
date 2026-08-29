@@ -1,0 +1,63 @@
+<!-- PWA Floating Install Banner -->
+<div id="pwa-install-banner" class="pwa-install-banner shadow-lg" style="display: none;">
+    <div class="d-flex align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <img src="/static/icons/icon-192.svg" alt="App Icon" class="pwa-banner-icon rounded-3">
+            <div>
+                <div class="fw-bold text-dark pwa-banner-title">Install Mobile App</div>
+                <div class="text-muted small pwa-banner-desc">Get faster access, offline support &amp; alarms</div>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button id="pwa-install-btn" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">
+                <i class="bi bi-download me-1"></i> Install
+            </button>
+            <button id="pwa-dismiss-btn" class="btn btn-sm btn-light rounded-circle text-muted" aria-label="Dismiss">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- iOS Safari Manual Installation Modal -->
+<div class="modal fade" id="iosInstallModal" tabindex="-1" aria-labelledby="iosInstallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="/static/icons/icon-192.svg" alt="App Icon" style="width: 36px; height: 36px;" class="rounded-3">
+                    <h5 class="modal-title fw-bold" id="iosInstallModalLabel">Install on iOS / Safari</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-3">Install <strong>Task &amp; Wellness Manager</strong> to your iPhone or iPad home screen for full-screen experience and alarm notifications:</p>
+                <div class="list-group list-group-flush border-0">
+                    <div class="list-group-item d-flex align-items-center gap-3 px-0 border-0">
+                        <span class="badge bg-primary rounded-pill fs-6 px-2 py-1">1</span>
+                        <div>Tap the <strong>Share</strong> button <i class="bi bi-box-arrow-up text-primary fw-bold"></i> in Safari's bottom toolbar.</div>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center gap-3 px-0 border-0">
+                        <span class="badge bg-primary rounded-pill fs-6 px-2 py-1">2</span>
+                        <div>Scroll down and select <strong>"Add to Home Screen"</strong> <i class="bi bi-plus-square text-dark"></i>.</div>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center gap-3 px-0 border-0">
+                        <span class="badge bg-primary rounded-pill fs-6 px-2 py-1">3</span>
+                        <div>Tap <strong>Add</strong> in the top right corner.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-primary w-100 rounded-pill fw-bold" data-bs-dismiss="modal">Got it!</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Offline / Online Toast Pill -->
+<div id="connectivity-toast" class="connectivity-toast shadow-sm" style="display: none;">
+    <div class="d-flex align-items-center gap-2">
+        <i id="connectivity-icon" class="bi bi-wifi-off"></i>
+        <span id="connectivity-text">You are offline. Showing cached view.</span>
+    </div>
+</div>

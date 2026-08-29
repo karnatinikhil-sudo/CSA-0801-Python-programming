@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static humanize %}
+
+{% block title %}My Tasks &bull; Digital To-Do &amp; Wellness Manager{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-check2-square text-primary me-2"></i>My Tasks</h2>
+        <p class="text-muted mb-0">Organize, track completion time, and sync tasks to your calendar.</p>
+    </div>
+    <div class="d-flex gap-2 mt-3 mt-md-0">
+        <a href="{% url 'calendar_sync:export_all_tasks_ics' %}" class="btn btn-outline-secondary rounded-pill">
+            <i class="bi bi-calendar-plus me-1 text-primary"></i> Export All to .ics
+        </a>
+        <a href="{% url 'tasks:create' %}" class="btn btn-primary rounded-pill px-3">
+            <i class="bi bi-plus-lg me-1"></i> Add Detailed Task
+        </a>
+    </div>
+</div>
+
+<!-- 10-Second Quick Add Bar -->
+<div class="quick-add-box mb-4">
+    <form id="quick-task-form">
+        <div class="input-group">
+            <span class="input-group-text bg-transparent border-0 text-primary fs-5 ps-0">
+                <i class="bi bi-plus-circle-fill"></i>
+            </span>
+            <input type="text" id="quick-task-title" class="form-control form-control-lg border-0 shadow-none" placeholder="Quickly add a task (e.g. 'Draft proposal tomorrow 3pm high priority #Work')..." autofocus required>
+            <button type="submit" class="btn btn-primary px-4 fw-semibold rounded-3 d-flex align-items-center gap-2">
+                <span>Add Task</span> <i class="bi bi-arrow-return-left small"></i>
+            </button>
+        </div>
+        <div class="row g-2 mt-2 pt-2 border-top">
+            <div class="col-6 col-md-3">
+                <label class="form-label text-muted small mb-1">Priority</label>
+                <select id="quick-task-priority" class="form-select form-select-sm">
+                    <option value="LOW">🟢 Low</option>
+                    <option value="MEDIUM" selected>🟡 Medium</option>
+                    <option value="HIGH">🔴 High (Urgent)</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label text-muted small mb-1">Category</label>
+                <select id="quick-task-category" class="form-select form-select-sm">
+                    <option value="Work" selected>Work</option>
+                    <option value="Personal">Personal</option>
+                    <option value="Health">Health</option>
+                    <option value="Study">Study</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label text-muted small mb-1">Due Date</label>
+                <input type="date" id="quick-task-date" class="form-control form-control-sm" value="{{ today|date:'Y-m-d' }}">
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label text-muted small mb-1">Due Time</label>
+                <input type="time" id="quick-task-time" class="form-control form-control-sm">
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Search & Status Filter Tabs -->
+<div class="card-custom p-3 mb-4 bg-white">
+    <div class="row g-3 align-items-center">
+        <!-- Status Filter Pills -->
+        <div class="col-lg-7">
+            <div class="d-flex flex-wrap gap-1">
+                <a href="?status=ALL{% if q %}&q={{ q }}{% endif %}{% if category_filter != 'ALL' %}&category={{ category_filter }}{% endif %}" class="btn btn-sm {% if status_filter == 'ALL' %}btn-primary{% else %}btn-light border{% endif %} rounded-pill">
+                    All <span class="badge bg-dark-subtle text-dark ms-1" id="count-badge-total">{{ total_count }}</span>
+                </a>
+                <a href="?status=PENDING{% if q %}&q={{ q }}{% endif %}{% if category_filter != 'ALL' %}&category={{ category_filter }}{% endif %}" class="btn btn-sm {% if status_filter == 'PENDING' %}btn-warning text-dark{% else %}btn-light border{% endif %} rounded-pill">
+                    Pending <span class="badge bg-secondary-subtle text-secondary ms-1" id="count-badge-pending">{{ pending_count }}</span>
+                </a>
+                <a href="?status=IN_PROGRESS{% if q %}&q={{ q }}{% endif %}{% if category_filter != 'ALL' %}&category={{ category_filter }}{% endif %}" class="btn btn-sm {% if status_filter == 'IN_PROGRESS' %}btn-info text-white{% else %}btn-light border{% endif %} rounded-pill">
+                    In Progress <span class="badge bg-secondary-subtle text-secondary ms-1">{{ in_progress_count }}</span>
+                </a>
+                <a href="?status=COMPLETED{% if q %}&q={{ q }}{% endif %}{% if category_filter != 'ALL' %}&category={{ category_filter }}{% endif %}" class="btn btn-sm {% if status_filter == 'COMPLETED' %}btn-success{% else %}btn-light border{% endif %} rounded-pill">
+                    Completed <span class="badge bg-secondary-subtle text-secondary ms-1" id="count-badge-completed">{{ completed_count }}</span>
+                </a>
+                <a href="?status=OVERDUE{% if q %}&q={{ q }}{% endif %}{% if category_filter != 'ALL' %}&category={{ category_filter }}{% endif %}" class="btn btn-sm {% if status_filter == 'OVERDUE' %}btn-danger{% else %}btn-light border{% endif %} rounded-pill">
+                    Overdue <span class="badge bg-danger-subtle text-danger ms-1" id="count-badge-overdue">{{ overdue_count }}</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Keyword Search -->
+        <div class="col-lg-5">
+            <form method="GET" class="d-flex gap-2">
+                {% if status_filter != 'ALL' %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" value="{{ q }}" class="form-control border-start-0" placeholder="Search tasks...">
+                </div>
+                <button type="submit" class="btn btn-outline-secondary">Search</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Task List -->
+<div class="task-list-section">
+    {% for task in tasks %}
+        <div class="task-row {% if task.status == 'COMPLETED' %}is-completed{% endif %}" id="task-row-{{ task.id }}">
+            <div class="d-flex align-items-center gap-3">
+                <input type="checkbox" class="form-check-input task-checkbox-custom" data-task-id="{{ task.id }}" {% if task.status == 'COMPLETED' %}checked{% endif %} title="Tap to toggle completion">
+                <div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="fw-bold task-title-text text-dark fs-5">{{ task.title }}</span>
+                        <span class="badge badge-priority-{{ task.priority|lower }}">{{ task.get_priority_display }}</span>
+                        <span class="badge bg-secondary-subtle text-secondary">{{ task.category }}</span>
+                        {% if task.recurrence != 'NONE' %}
+                            <span class="badge bg-info-subtle text-info"><i class="bi bi-repeat me-1"></i>{{ task.get_recurrence_display }}</span>
+                        {% endif %}
+                    </div>
+                    {% if task.description %}
+                        <p class="text-muted small mb-1 mt-1">{{ task.description }}</p>
+                    {% endif %}
+                    <div class="text-muted small d-flex flex-wrap align-items-center gap-2 mt-1">
+                        <span><i class="bi bi-calendar3 me-1"></i> Due: <strong>{{ task.due_date|date:"M j, Y" }}</strong>{% if task.due_time %} at {{ task.due_time|time:"H:i" }}{% endif %}</span>
+                        <span>&bull;</span>
+                        <span class="badge-time-track" id="task-duration-{{ task.id }}">
+                            <i class="bi bi-stopwatch"></i> {{ task.time_to_complete_formatted }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="task-row-actions d-flex align-items-center gap-2 mt-2 mt-md-0">
+                <span class="badge badge-status-{{ task.status|lower|cut:'_' }}" id="task-status-badge-{{ task.id }}">
+                    {{ task.get_status_display }}
+                </span>
+                
+                <a href="{% url 'calendar_sync:export_task_ics' task.id %}" class="btn btn-sm btn-light border" title="Export .ics Calendar Event">
+                    <i class="bi bi-calendar-plus text-primary"></i>
+                </a>
+
+                <a href="{% url 'tasks:edit' task.id %}" class="btn btn-sm btn-light border" title="Edit Task">
+                    <i class="bi bi-pencil text-muted"></i>
+                </a>
+
+                <form method="POST" action="{% url 'tasks:delete' task.id %}" onsubmit="return confirm('Are you sure you want to delete task &quot;{{ task.title }}&quot;?');" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-light border text-danger" title="Delete Task">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    {% empty %}
+        <div class="card-custom p-5 text-center bg-white">
+            <i class="bi bi-clipboard2-plus fs-1 text-primary d-block mb-3"></i>
+            <h4 class="fw-bold">No tasks found</h4>
+            <p class="text-muted">Use the quick add bar above or create a detailed task.</p>
+            <div>
+                <a href="{% url 'tasks:create' %}" class="btn btn-primary rounded-pill px-4">
+                    <i class="bi bi-plus-lg me-1"></i> Add Your First Task
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% if user.is_authenticated %}
+<nav class="mobile-bottom-nav d-lg-none" aria-label="Mobile Navigation">
+    <div class="mobile-nav-container">
+        <!-- Dashboard -->
+        <a href="{% url 'dashboard:index' %}" class="mobile-nav-item {% if request.resolver_match.app_name == 'dashboard' and request.resolver_match.url_name == 'index' %}active{% endif %}">
+            <div class="mobile-nav-icon">
+                <i class="bi bi-grid-1x2-fill"></i>
+            </div>
+            <span class="mobile-nav-label">Home</span>
+        </a>
+
+        <!-- Tasks -->
+        <a href="{% url 'tasks:list' %}" class="mobile-nav-item {% if request.resolver_match.app_name == 'tasks' %}active{% endif %}">
+            <div class="mobile-nav-icon">
+                <i class="bi bi-check2-square"></i>
+            </div>
+            <span class="mobile-nav-label">Tasks</span>
+        </a>
+
+        <!-- Floating Quick Add Center Button -->
+        <button type="button" class="mobile-nav-fab" data-bs-toggle="modal" data-bs-target="#mobileQuickAddModal" aria-label="Quick Add Task">
+            <i class="bi bi-plus-lg"></i>
+        </button>
+
+        <!-- Health & Meds -->
+        <a href="{% url 'health:medicines' %}" class="mobile-nav-item {% if request.resolver_match.app_name == 'health' %}active{% endif %}">
+            <div class="mobile-nav-icon">
+                <i class="bi bi-capsule"></i>
+            </div>
+            <span class="mobile-nav-label">Wellness</span>
+        </a>
+
+        <!-- Profile & Settings -->
+        <a href="{% url 'accounts:profile' %}" class="mobile-nav-item {% if request.resolver_match.app_name == 'accounts' %}active{% endif %}">
+            <div class="mobile-nav-icon">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <span class="mobile-nav-label">Account</span>
+        </a>
+    </div>
+</nav>
+{% endif %}

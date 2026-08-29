@@ -1,0 +1,70 @@
+{
+  "name": "Digital To-Do & Wellness Manager",
+  "short_name": "TaskWellness",
+  "description": "Smart task management integrated with WHO-guided hydration, micro-wellness breaks, and medication alarms.",
+  "start_url": "/",
+  "scope": "/",
+  "id": "/?source=pwa",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "categories": ["productivity", "health", "lifestyle", "utilities"],
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Quick Task",
+      "short_name": "New Task",
+      "description": "Quickly create a new task in under 10 seconds",
+      "url": "/tasks/?action=new",
+      "icons": [{ "src": "/static/icons/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Log Hydration (+1 Glass)",
+      "short_name": "Water",
+      "description": "Log a glass of water toward your daily goal",
+      "url": "/#central-wellness-card",
+      "icons": [{ "src": "/static/icons/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Medications & Alarms",
+      "short_name": "Meds",
+      "description": "View medication schedule and dose alarms",
+      "url": "/health/medicines/",
+      "icons": [{ "src": "/static/icons/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Weekly Reports",
+      "short_name": "Reports",
+      "description": "View productivity analytics & PDF reports",
+      "url": "/reports/",
+      "icons": [{ "src": "/static/icons/icon-192.svg", "sizes": "192x192" }]
+    }
+  ]
+}

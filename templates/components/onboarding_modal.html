@@ -1,0 +1,217 @@
+<!-- 3-Step Guided Onboarding Walkthrough Modal -->
+<div class="modal fade show" id="onboardingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" style="display: block; background-color: rgba(15, 23, 42, 0.65);" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            
+            <div class="modal-header bg-primary text-white p-4">
+                <div>
+                    <span class="badge bg-white text-primary fw-bold mb-2">Welcome Walkthrough</span>
+                    <h4 class="modal-title fw-bold mb-0">Welcome to Digital To-Do &amp; Wellness!</h4>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="dismissOnboarding()">
+                    Skip Tour &times;
+                </button>
+            </div>
+
+            <div class="modal-body p-4">
+                <!-- Step Indicator -->
+                <div class="onboarding-step-indicator">
+                    <div class="step-dot active" id="onb-dot-1">1</div>
+                    <div class="step-dot" id="onb-dot-2">2</div>
+                    <div class="step-dot" id="onb-dot-3">3</div>
+                </div>
+
+                <!-- Step 1: Add First Task -->
+                <div class="onboarding-step" id="onb-step-1">
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex p-3 rounded-circle bg-primary-subtle text-primary mb-3">
+                            <i class="bi bi-check2-circle fs-1"></i>
+                        </div>
+                        <h4 class="fw-bold">Step 1: Add Your First Task</h4>
+                        <p class="text-muted">Task management is lightning-fast. Type anything you need to accomplish today.</p>
+                    </div>
+                    <div class="bg-light p-3 rounded-3 mb-3">
+                        <input type="text" id="onb-task-title" class="form-control form-control-lg mb-2" placeholder="e.g. Finish client presentation by 4pm" autofocus>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <select id="onb-task-priority" class="form-select">
+                                    <option value="HIGH">High Priority (Urgent)</option>
+                                    <option value="MEDIUM" selected>Medium Priority</option>
+                                    <option value="LOW">Low Priority</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <select id="onb-task-category" class="form-select">
+                                    <option value="Work" selected>Work</option>
+                                    <option value="Personal">Personal</option>
+                                    <option value="Health">Health</option>
+                                    <option value="Study">Study</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-outline-secondary" onclick="nextOnboardingStep(2)">Next &rarr;</button>
+                        <button class="btn btn-primary px-4" onclick="saveOnboardingTask()">Save &amp; Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Set Age, Active Hours & WHO Hydration -->
+                <div class="onboarding-step d-none" id="onb-step-2">
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex p-3 rounded-circle bg-info-subtle text-info mb-3">
+                            <i class="bi bi-heart-pulse fs-1"></i>
+                        </div>
+                        <h4 class="fw-bold">Step 2: Your Age &amp; Active Work Schedule</h4>
+                        <p class="text-muted">We use World Health Organization (WHO) standards to compute your daily hydration needs based on your age and busy work hours.</p>
+                    </div>
+                    <div class="row g-3 bg-light p-3 rounded-3 mb-3">
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">Your Age <span class="badge bg-primary-subtle text-primary">WHO Metric</span></label>
+                            <input type="number" id="onb-user-age" class="form-control" value="28" min="1" max="120" placeholder="e.g. 28">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">Work Habits</label>
+                            <select id="onb-activity-level" class="form-select">
+                                <option value="SEDENTARY" selected>Busy Desk Work / Coding</option>
+                                <option value="MODERATE">Moderate Activity</option>
+                                <option value="HIGH">High Activity / Sports</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">Work Start Time</label>
+                            <input type="time" id="onb-hours-start" class="form-control" value="09:00">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">Work End Time</label>
+                            <input type="time" id="onb-hours-end" class="form-control" value="18:00">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-outline-secondary" onclick="nextOnboardingStep(1)">&larr; Back</button>
+                        <button class="btn btn-primary px-4" onclick="nextOnboardingStep(3)">Continue &rarr;</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Optional Medication Tracker -->
+                <div class="onboarding-step d-none" id="onb-step-3">
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex p-3 rounded-circle bg-success-subtle text-success mb-3">
+                            <i class="bi bi-capsule fs-1"></i>
+                        </div>
+                        <h4 class="fw-bold">Step 3: Add Medications (Optional)</h4>
+                        <p class="text-muted">Do you have daily vitamins or prescription meds? Track them with alarms. (Skip if not needed).</p>
+                    </div>
+                    <div class="bg-light p-3 rounded-3 mb-3">
+                        <div class="row g-2">
+                            <div class="col-sm-7">
+                                <label class="form-label fw-semibold">Medication Name</label>
+                                <input type="text" id="onb-med-name" class="form-control" placeholder="e.g. Vitamin D3, Omega 3, Metformin">
+                            </div>
+                            <div class="col-sm-5">
+                                <label class="form-label fw-semibold">Dosage</label>
+                                <input type="text" id="onb-med-dosage" class="form-control" placeholder="e.g. 500mg or 1 pill">
+                            </div>
+                            <div class="col-sm-6 mt-2">
+                                <label class="form-label fw-semibold">Dose Time</label>
+                                <input type="time" id="onb-med-time" class="form-control" value="08:30">
+                            </div>
+                            <div class="col-sm-6 mt-2">
+                                <label class="form-label fw-semibold">Instruction Notes</label>
+                                <input type="text" id="onb-med-notes" class="form-control" placeholder="e.g. After breakfast with water">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-outline-secondary" onclick="nextOnboardingStep(2)">&larr; Back</button>
+                        <button class="btn btn-success px-4 fw-bold" onclick="finishOnboarding()">Complete Setup &amp; Go to Dashboard &check;</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function nextOnboardingStep(step) {
+    document.querySelectorAll('.onboarding-step').forEach(el => el.classList.add('d-none'));
+    const target = document.getElementById(`onb-step-${step}`);
+    if (target) target.classList.remove('d-none');
+
+    for (let i = 1; i <= 3; i++) {
+        const dot = document.getElementById(`onb-dot-${i}`);
+        if (dot) {
+            dot.className = `step-dot ${i === step ? 'active' : (i < step ? 'done' : '')}`;
+        }
+    }
+}
+
+function saveOnboardingTask() {
+    const title = document.getElementById('onb-task-title').value.trim();
+    if (title) {
+        fetch('/tasks/quick-create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                title: title,
+                priority: document.getElementById('onb-task-priority').value,
+                category: document.getElementById('onb-task-category').value
+            })
+        }).catch(err => console.error(err));
+    }
+    nextOnboardingStep(2);
+}
+
+function finishOnboarding() {
+    const medName = document.getElementById('onb-med-name').value.trim();
+    if (medName) {
+        // Create medicine entry if specified
+        fetch('/health/medicines/new/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                'name': medName,
+                'dosage': document.getElementById('onb-med-dosage').value.trim() || '1 dose',
+                'frequency': 'ONCE',
+                'time_1': document.getElementById('onb-med-time').value || '08:00',
+                'notes': document.getElementById('onb-med-notes').value.trim() || 'Take with water',
+                'is_active': 'on'
+            })
+        }).catch(err => console.error(err));
+    }
+
+    dismissOnboarding();
+}
+
+function dismissOnboarding() {
+    const ageVal = document.getElementById('onb-user-age')?.value || 28;
+    const activityVal = document.getElementById('onb-activity-level')?.value || 'SEDENTARY';
+    const startVal = document.getElementById('onb-hours-start')?.value || '09:00';
+    const endVal = document.getElementById('onb-hours-end')?.value || '18:00';
+
+    fetch('/auth/onboarding/complete/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            age: ageVal,
+            activity_level: activityVal,
+            hours_start: startVal,
+            hours_end: endVal
+        })
+    }).then(() => {
+        const modal = document.getElementById('onboardingModal');
+        if (modal) modal.remove();
+        window.location.reload();
+    });
+}
+</script>

@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Digital To-Do & Wellness Manager{% endblock %}</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <!-- Progressive Web App Meta -->
+    <link rel="manifest" href="{% url 'pwa_manifest' %}">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="TaskWellness">
+    <link rel="apple-touch-icon" href="{% static 'icons/icon-192.svg' %}">
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="has-mobile-bottom-nav">
+    {% include 'components/navbar.html' %}
+
+    <main class="container py-4 flex-grow-1">
+        <!-- Django Flash Messages -->
+        {% if messages %}
+            <div class="row justify-content-center mb-3">
+                <div class="col-12">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show card-custom" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill text-success{% elif message.tags == 'error' %}bi-exclamation-triangle-fill text-danger{% else %}bi-info-circle-fill text-primary{% endif %} fs-5 me-2"></i>
+                                <span>{{ message }}</span>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Mobile Bottom Navigation Bar (Visible on Mobile) -->
+    {% include 'components/mobile_nav.html' %}
+
+    <!-- Mobile Quick Add Bottom Sheet Modal -->
+    {% include 'components/mobile_quick_add_modal.html' %}
+
+    <!-- PWA Install Banner & Modals -->
+    {% include 'components/pwa_install_banner.html' %}
+
+    <!-- Floating Live Toast Notifications Container -->
+    {% include 'components/toast_notifications.html' %}
+
+    <!-- 3-Step Guided Onboarding Walkthrough (First-time user) -->
+    {% if user.is_authenticated and not user.profile.onboarding_completed %}
+        {% include 'components/onboarding_modal.html' %}
+    {% endif %}
+
+    <footer class="py-3 mt-auto bg-white border-top text-center text-muted small pb-mobile-nav">
+        <div class="container d-flex flex-column flex-sm-row justify-content-between align-items-center">
+            <span>&copy; {% now "Y" %} <strong>Digital To-Do &amp; Wellness Manager</strong> &bull; Stay Healthy. Get Things Done.</span>
+            <div class="mt-2 mt-sm-0">
+                <a href="{% url 'dashboard:reports' %}" class="text-muted me-3">Reports</a>
+                <a href="{% url 'calendar_sync:settings' %}" class="text-muted me-3">Calendar Sync</a>
+                <a href="{% url 'accounts:profile' %}" class="text-muted">Preferences</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core App JS -->
+    <script src="{% static 'js/app.js' %}"></script>
+    <script src="{% static 'js/charts.js' %}"></script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
+

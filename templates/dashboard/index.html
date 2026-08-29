@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static humanize %}
+
+{% block title %}Dashboard &bull; Digital To-Do &amp; Wellness Manager{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Hello, {{ user.first_name|default:user.username }} 👋</h2>
+        <p class="text-muted mb-0">Here is your daily productivity and wellness overview for today, <strong>{{ today|date:"l, F j, Y" }}</strong>.</p>
+    </div>
+    <div class="d-flex gap-2 mt-3 mt-md-0">
+        <a href="{% url 'tasks:create' %}" class="btn btn-outline-primary rounded-pill">
+            <i class="bi bi-plus-circle me-1"></i> Full Task Form
+        </a>
+        <a href="{% url 'dashboard:reports' %}" class="btn btn-primary rounded-pill px-3">
+            <i class="bi bi-download me-1"></i> Export Reports
+        </a>
+    </div>
+</div>
+
+<!-- 1. Ultra-Fast Quick Add Box (< 10 Seconds) -->
+<div class="quick-add-box">
+    <form id="quick-task-form">
+        <div class="input-group">
+            <span class="input-group-text bg-transparent border-0 text-primary fs-5 ps-0">
+                <i class="bi bi-plus-circle-fill"></i>
+            </span>
+            <input type="text" id="quick-task-title" class="form-control form-control-lg border-0 shadow-none" placeholder="Add a new task (e.g. 'Finish quarterly audit tomorrow at 4pm high priority #Work')..." autofocus required>
+            <button type="submit" class="btn btn-primary px-4 fw-semibold rounded-3 d-flex align-items-center gap-2">
+                <span>Add Task</span> <i class="bi bi-arrow-return-left small"></i>
+            </button>
+        </div>
+        <div class="row g-2 mt-2 pt-2 border-top">
+            <div class="col-6 col-md-3">
+                <label class="form-label text-muted small mb-1">Priority</label>
+                <select id="quick-task-priority" class="form-select form-select-sm">
+                    <option value="LOW">🟢 Low</option>
+                    <option value="MEDIUM" selected>🟡 Medium</option>
+                    <option value="HIGH">🔴 High (Urgent)</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label text-muted small mb-1">Category</label>
+                <select id="quick-task-category" class="form-select form-select-sm">
+                    <option value="Work" selected>Work</option>
+                    <option value="Personal">Personal</option>
+                    <option value="Health">Health</option>
+                    <option value="Study">Study</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label text-muted small mb-1">Due Date</label>
+                <input type="date" id="quick-task-date" class="form-control form-control-sm" value="{{ today|date:'Y-m-d' }}">
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label text-muted small mb-1">Due Time (Optional)</label>
+                <input type="time" id="quick-task-time" class="form-control form-control-sm">
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- 2. KPI Summary Metrics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card-custom p-3 h-100 border-start border-primary border-4">
+            <div class="text-muted small fw-semibold text-uppercase">Total Tasks</div>
+            <div class="d-flex align-items-baseline gap-2 mt-1">
+                <h3 class="fw-bold mb-0 text-dark" id="count-badge-total">{{ total_count }}</h3>
+                <span class="small text-muted">active &amp; past</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card-custom p-3 h-100 border-start border-warning border-4">
+            <div class="text-muted small fw-semibold text-uppercase">Pending / In Progress</div>
+            <div class="d-flex align-items-baseline gap-2 mt-1">
+                <h3 class="fw-bold mb-0 text-warning" id="count-badge-pending">{{ pending_count|add:in_progress_count }}</h3>
+                <span class="small text-muted">{{ in_progress_count }} active now</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card-custom p-3 h-100 border-start border-success border-4">
+            <div class="text-muted small fw-semibold text-uppercase">Completed</div>
+            <div class="d-flex align-items-baseline gap-2 mt-1">
+                <h3 class="fw-bold mb-0 text-success" id="count-badge-completed">{{ completed_count }}</h3>
+                <span class="small {{ weekly_trend_class }} fw-semibold">{{ weekly_trend_badge }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card-custom p-3 h-100 border-start border-danger border-4">
+            <div class="text-muted small fw-semibold text-uppercase">Overdue</div>
+            <div class="d-flex align-items-baseline gap-2 mt-1">
+                <h3 class="fw-bold mb-0 text-danger" id="count-badge-overdue">{{ overdue_count }}</h3>
+                <span class="small text-muted">needs attention</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Completion Time Metric Banner -->
+<div class="alert bg-white border card-custom p-3 d-flex flex-wrap align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <span class="p-2 rounded-circle bg-primary-subtle text-primary">
+            <i class="bi bi-stopwatch fs-4"></i>
+        </span>
+        <div>
+            <h6 class="fw-bold mb-0 text-dark">Time-Tracking Trend</h6>
+            <span class="text-muted small">{{ avg_completion_statement }}</span>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2 mt-2 mt-sm-0">
+        <span class="badge bg-light text-dark border px-3 py-2 fw-medium">Completion Rate: <strong>{{ completion_rate }}%</strong></span>
+    </div>
+</div>
+
+<!-- 3. HEALTH & WELLNESS MODULE (Sits prominently in the middle of the Dashboard!) -->
+{% include 'health/wellness_card.html' %}
+
+<!-- 4. Visual Analytics & Charts Section -->
+<div class="row g-4 mb-4">
+    <!-- Status Breakdown (Donut) -->
+    <div class="col-lg-4">
+        <div class="card-custom p-3 h-100">
+            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2 text-dark">
+                <i class="bi bi-pie-chart-fill text-primary"></i> Task Status Split
+            </h6>
+            <div style="position: relative; height: 220px;">
+                <canvas id="chart-status-donut"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Priority Breakdown (Bar) -->
+    <div class="col-lg-4">
+        <div class="card-custom p-3 h-100">
+            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2 text-dark">
+                <i class="bi bi-bar-chart-fill text-warning"></i> Priority Breakdown
+            </h6>
+            <div style="position: relative; height: 220px;">
+                <canvas id="chart-priority-bar"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7-Day Completion Velocity -->
+    <div class="col-lg-4">
+        <div class="card-custom p-3 h-100">
+            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2 text-dark">
+                <i class="bi bi-graph-up text-success"></i> 7-Day Completion Velocity
+            </h6>
+            <div style="position: relative; height: 220px;">
+                <canvas id="chart-weekly-velocity"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 5. Urgent & Upcoming Tasks Table -->
+<div class="card-custom p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-list-task text-primary"></i> Priority Tasks Due Soon
+        </h5>
+        <a href="{% url 'tasks:list' %}" class="btn btn-sm btn-outline-primary rounded-pill">
+            View All Tasks ({{ total_count }}) &rarr;
+        </a>
+    </div>
+
+    <div class="task-list-container">
+        {% for task in urgent_tasks %}
+            <div class="task-row {% if task.status == 'COMPLETED' %}is-completed{% endif %}" id="task-row-{{ task.id }}">
+                <div class="d-flex align-items-center gap-3">
+                    <input type="checkbox" class="form-check-input task-checkbox-custom" data-task-id="{{ task.id }}" {% if task.status == 'COMPLETED' %}checked{% endif %} title="Tap to toggle complete">
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-bold task-title-text text-dark">{{ task.title }}</span>
+                            <span class="badge badge-priority-{{ task.priority|lower }}">{{ task.get_priority_display }}</span>
+                            <span class="badge bg-secondary-subtle text-secondary">{{ task.category }}</span>
+                        </div>
+                        <div class="text-muted small mt-1 d-flex flex-wrap align-items-center gap-2">
+                            <span><i class="bi bi-calendar3 me-1"></i> Due: {{ task.due_date|date:"M j, Y" }}{% if task.due_time %} at {{ task.due_time|time:"H:i" }}{% endif %}</span>
+                            <span class="badge-time-track" id="task-duration-{{ task.id }}">
+                                <i class="bi bi-clock-history"></i> {{ task.time_to_complete_formatted }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-row-actions d-flex align-items-center gap-2">
+                    <span class="badge badge-status-{{ task.status|lower|cut:'_' }}" id="task-status-badge-{{ task.id }}">
+                        {{ task.get_status_display }}
+                    </span>
+                    <a href="{% url 'calendar_sync:export_task_ics' task.id %}" class="btn btn-sm btn-light border" title="Export .ics Calendar Event">
+                        <i class="bi bi-calendar-plus text-primary"></i>
+                    </a>
+                    <a href="{% url 'tasks:edit' task.id %}" class="btn btn-sm btn-light border" title="Edit Task">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-clipboard-check fs-1 text-success d-block mb-2"></i>
+                <h6>You're all caught up! No urgent tasks pending.</h6>
+                <p class="small">Use the quick add bar above to create a new task in seconds.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const statusData = JSON.parse('{{ chart_status_json|escapejs }}');
+    const priorityData = JSON.parse('{{ chart_priority_json|escapejs }}');
+    const velocityData = JSON.parse('{{ chart_velocity_json|escapejs }}');
+    renderDashboardCharts(statusData, priorityData, velocityData);
+});
+</script>
+{% endblock %}

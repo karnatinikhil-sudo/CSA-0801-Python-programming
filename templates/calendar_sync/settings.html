@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Calendar &amp; Alarm Integration &bull; Digital To-Do &amp; Wellness Manager{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="fw-bold mb-1"><i class="bi bi-calendar-check text-primary me-2"></i>Calendar &amp; Alarm Integration</h2>
+    <p class="text-muted mb-0">Sync your tasks and medication schedules to your phone's native calendar and alarm system.</p>
+</div>
+
+<div class="row g-4">
+    <!-- 1. Downloadable .ics Calendar Feeds -->
+    <div class="col-lg-6">
+        <div class="card-custom p-4 bg-white h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="p-2 rounded bg-primary-subtle text-primary">
+                    <i class="bi bi-file-earmark-arrow-down fs-4"></i>
+                </span>
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark">Universal .ics Calendar Files</h5>
+                    <small class="text-muted">Compatible with Apple Calendar, Outlook, Google Calendar, and Android</small>
+                </div>
+            </div>
+
+            <p class="text-muted small">Download universal calendar files to import your scheduled deadlines and daily medication dose alarms into any phone or desktop calendar app.</p>
+
+            <div class="d-grid gap-2 mt-4">
+                <a href="{% url 'calendar_sync:export_all_tasks_ics' %}" class="btn btn-outline-primary d-flex align-items-center justify-content-between p-3 rounded-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-check2-square fs-5"></i>
+                        <span class="fw-semibold">Export All Tasks (.ics)</span>
+                    </div>
+                    <span class="badge bg-primary">{{ task_count }} tasks</span>
+                </a>
+
+                <a href="{% url 'calendar_sync:export_medication_ics' %}" class="btn btn-outline-success d-flex align-items-center justify-content-between p-3 rounded-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-capsule fs-5"></i>
+                        <span class="fw-semibold">Export Medication Schedule (.ics)</span>
+                    </div>
+                    <span class="badge bg-success">{{ med_count }} meds</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Google Calendar Direct OAuth Sync -->
+    <div class="col-lg-6">
+        <div class="card-custom p-4 bg-white h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="p-2 rounded bg-danger-subtle text-danger">
+                    <i class="bi bi-google fs-4"></i>
+                </span>
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark">Google Calendar Direct Sync</h5>
+                    <small class="text-muted">Two-way sync &amp; conflict awareness</small>
+                </div>
+            </div>
+
+            {% if connection.is_connected %}
+                <div class="alert alert-success d-flex align-items-center justify-content-between p-3 mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                        <div>
+                            <strong>Google Calendar Connected</strong>
+                            <div class="small text-muted">Last synced: {{ connection.last_synced_at|default:"Recently" }}</div>
+                        </div>
+                    </div>
+                    <form method="POST" action="{% url 'calendar_sync:google_disconnect' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Disconnect</button>
+                    </form>
+                </div>
+                <p class="text-muted small">New tasks and medication reminders are automatically synchronized to your primary Google Calendar. Two-way conflict warnings will alert you if scheduling conflicts occur.</p>
+            {% else %}
+                <div class="alert alert-light border p-3 mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="bi bi-info-circle text-muted"></i>
+                        <strong>Not Connected Yet</strong>
+                    </div>
+                    <span class="text-muted small">Connect your Google account to automatically push deadlines directly to Google Calendar.</span>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <a href="{% url 'calendar_sync:google_connect' %}" class="btn btn-danger d-flex align-items-center justify-content-center gap-2 p-3 rounded-3 fw-bold">
+                        <i class="bi bi-google"></i> Connect Google Calendar
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 3. Web Push & Mobile Loud Alarm Settings -->
+    <div class="col-12">
+        <div class="card-custom p-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="p-2 rounded bg-warning-subtle text-warning">
+                        <i class="bi bi-bell-fill fs-4 text-warning"></i>
+                    </span>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">Mobile Push &amp; Alarm-Style Alerts</h5>
+                        <small class="text-muted">Loud audible alert chimes for urgent tasks &amp; medication times</small>
+                    </div>
+                </div>
+                <button class="btn btn-outline-primary btn-sm rounded-pill" onclick="testUrgentChime()">
+                    <i class="bi bi-volume-up-fill me-1"></i> Test Alarm Chime
+                </button>
+            </div>
+
+            <p class="text-muted small mb-3">Enable browser Web Push notifications so urgent medication reminders and high-priority deadlines alert you even when the tab is running in the background.</p>
+
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button class="btn btn-primary" id="btn-enable-push" onclick="requestPushPermission()">
+                    <i class="bi bi-shield-check me-1"></i> Enable Push Notifications
+                </button>
+                <span class="text-muted small" id="push-permission-status"></span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function requestPushPermission() {
+    const statusEl = document.getElementById('push-permission-status');
+    if (!('Notification' in window)) {
+        if (statusEl) statusEl.textContent = "Web Notifications not supported in this browser.";
+        return;
+    }
+
+    Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+            if (statusEl) statusEl.innerHTML = '<span class="text-success fw-bold"><i class="bi bi-check-circle"></i> Notifications Enabled!</span>';
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/static/js/sw.js')
+                    .then(reg => console.log('SW registered:', reg))
+                    .catch(err => console.error('SW registration failed:', err));
+            }
+        } else {
+            if (statusEl) statusEl.innerHTML = '<span class="text-danger">Permission was denied.</span>';
+        }
+    });
+}
+</script>
+{% endblock %}

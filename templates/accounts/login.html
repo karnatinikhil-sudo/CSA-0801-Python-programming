@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Log In &bull; Digital To-Do &amp; Wellness Manager{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-auto py-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card-custom p-4 p-md-5 bg-white shadow-sm border-0" style="border-radius: 20px;">
+            <div class="text-center mb-4">
+                <div class="d-inline-flex p-3 rounded-circle bg-primary-subtle text-primary mb-2">
+                    <i class="bi bi-heart-pulse-fill fs-2"></i>
+                </div>
+                <h3 class="fw-bold text-dark mb-1">Welcome Back</h3>
+                <p class="text-muted small">Log in to your task &amp; wellness workspace</p>
+            </div>
+
+            <form method="POST" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email or Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-person text-muted"></i></span>
+                        {{ form.username }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <label class="form-label fw-semibold">Password</label>
+                        <a href="{% url 'accounts:password_reset' %}" class="small text-muted">Forgot?</a>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-lock text-muted"></i></span>
+                        {{ form.password }}
+                    </div>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary py-2 fw-bold rounded-pill">
+                        Log In &rarr;
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center mt-4 pt-3 border-top">
+                <span class="text-muted small">Don't have an account yet?</span>
+                <a href="{% url 'accounts:signup' %}" class="fw-bold ms-1">Create Account</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

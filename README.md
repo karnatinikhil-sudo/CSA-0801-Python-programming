@@ -1,16 +1,18 @@
 <div align="center">
 
 # 🌿 Digital To-Do &amp; Wellness Manager
-### Full-Stack Task Management & Active Health Tracking Web Application
+### Full-Stack Task Execution & Active Health Tracking Web Application
 
+[![CI Pipeline](https://github.com/karnatinikhil-sudo/CSA-0801-Python-programming/actions/workflows/ci.yml/badge.svg)](https://github.com/karnatinikhil-sudo/CSA-0801-Python-programming/actions)
 [![Python Version](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-6.1%20%2F%205.1-092E20.svg?logo=django&logoColor=white)](https://www.djangoproject.com/)
 [![Celery](https://img.shields.io/badge/Celery-5.6%20%2B%20Redis-37814A.svg?logo=celery&logoColor=white)](https://docs.celeryq.dev/)
-[![Database](https://img.shields.io/badge/Database-MySQL%20%2F%20SQLite3-003B57.svg?logo=sqlite&logoColor=white)]()
+[![Docker](https://img.shields.io/badge/Docker-Ready%20%2F%20Compose-2496ED.svg?logo=docker&logoColor=white)]()
 [![PWA](https://img.shields.io/badge/PWA-Ready%20%2F%20Offline%20Cache-5A0FC8.svg)]()
+[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/karnatinikhil-sudo/CSA-0801-Python-programming)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-*A production-ready full-stack Python web application that combines streamlined task execution with proactive health monitoring, hydration tracking, medication adherence regimens, background Celery notifications, and visual analytics dashboards.*
+*A modern, open-source full-stack Python web application designed for everyone. It bridges high-velocity task management with active health monitoring, hydration tracking, medication adherence regimens, background Celery notifications, and visual analytics dashboards.*
 
 </div>
 
@@ -69,6 +71,9 @@
 
 ```
 CSA-0801-Python-programming/
+├── .github/                               # GitHub Actions CI & Issue Templates
+│   ├── workflows/ci.yml                   # Automated Multi-Python Matrix CI Pipeline
+│   └── ISSUE_TEMPLATE/                    # Bug report & Feature request templates
 ├── apps/                                  # Django Pluggable Applications
 │   ├── accounts/                          # User authentication, profiles, & preferences
 │   ├── calendar_sync/                     # iCalendar (.ics) exports, Google Calendar sync
@@ -105,10 +110,14 @@ CSA-0801-Python-programming/
 │   ├── test_health.py                     # Hydration & medication tests
 │   ├── test_reminders.py                  # Reminder & Celery task tests
 │   └── test_tasks.py                      # Task CRUD & NLP parser tests
+├── Dockerfile                             # Production Docker Container
+├── docker-compose.yml                     # 1-Command Multi-Service Compose Setup
 ├── manage.py                              # Django CLI management script
 ├── requirements.txt                       # Full Python dependencies
 ├── .env.example                           # Sample environment configuration
-├── .gitignore                             # Git ignore rules
+├── CONTRIBUTING.md                        # Open-source contribution guidelines
+├── CODE_OF_CONDUCT.md                     # Contributor Code of Conduct
+├── SECURITY.md                            # Security policy
 ├── LICENSE                                # MIT License
 └── README.md                              # Complete documentation
 ```
@@ -117,14 +126,28 @@ CSA-0801-Python-programming/
 
 ## 🚀 Quick Start Guide
 
-### 1. Clone the Repository
+### Option A: 🐳 Run with Docker (Recommended for Anyone)
+The easiest way for anyone to run the full application with Redis & Celery:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/karnatinikhil-sudo/CSA-0801-Python-programming.git
+cd CSA-0801-Python-programming
+
+# 2. Start all services in 1 command
+docker compose up --build
+```
+Open **`http://localhost:8000/`** in your browser!
+
+---
+
+### Option B: 🐍 Run Locally with Python
+
+#### 1. Clone & Set Up Virtual Environment
 ```bash
 git clone https://github.com/karnatinikhil-sudo/CSA-0801-Python-programming.git
 cd CSA-0801-Python-programming
-```
 
-### 2. Set Up Virtual Environment & Dependencies
-```bash
 python -m venv .venv
 # On Windows:
 .venv\Scripts\activate
@@ -134,38 +157,21 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Run Database Migrations & Seed Data
+#### 2. Run Database Migrations & Seed Data
 ```bash
 python manage.py migrate
 python manage.py loaddata fixtures/wellness_tips.json
 ```
 
-### 4. Create Superuser (Optional)
-```bash
-python manage.py createsuperuser
-```
-
-### 5. Launch the Development Server
+#### 3. Launch the Server
 ```bash
 python manage.py runserver
 ```
-Open **`http://127.0.0.1:8000/`** in your browser!
-
-### 6. (Optional) Run Celery Background Worker & Beat
-```bash
-# Terminal 1: Celery Worker
-celery -A core worker -l info
-
-# Terminal 2: Celery Beat Scheduler
-celery -A core beat -l info
-```
-*(Note: If Redis is not running locally, setting `CELERY_TASK_ALWAYS_EAGER = True` in `.env` executes background tasks synchronously).*
+Visit **`http://127.0.0.1:8000/`** to get started!
 
 ---
 
 ## 🧪 Running Automated Tests
-
-Run the test suite across all modules:
 
 ```bash
 # Run tests with Django test runner:
@@ -177,8 +183,15 @@ pytest
 
 ---
 
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+Check out the [CONTRIBUTING.md](CONTRIBUTING.md) guide and feel free to submit a Pull Request.
+
+---
+
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is open source and available to everyone under the **[MIT License](LICENSE)**.
 
-Developed by **Nikhil Karnati**.
+Maintained by **[Nikhil Karnati](https://github.com/karnatinikhil-sudo)**.

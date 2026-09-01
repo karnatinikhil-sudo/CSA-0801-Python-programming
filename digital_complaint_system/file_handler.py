@@ -1,8 +1,7 @@
 """CSV file persistence handler for the Complaint System.
 
-This module provides robust serialization and deserialization of complaints,
-categories, and tracking history to and from CSV files. It ensures directories are created
-as needed and guards against file system IOErrors/OSErrors with user-friendly diagnostics.
+Provides serialization and deserialization of complaints, categories, location coordinates,
+and tracking history to and from CSV files. Catches OSError/IOError exceptions gracefully.
 """
 
 import csv
@@ -22,6 +21,10 @@ CSV_FIELDNAMES = [
     "priority",
     "status",
     "assigned_to",
+    "location",
+    "latitude",
+    "longitude",
+    "is_critical_crime",
     "date_registered",
     "date_resolved",
     "status_history",
@@ -32,24 +35,11 @@ def save_complaints_to_csv(
     filepath: str = DEFAULT_COMPLAINTS_FILE,
     complaints_dict: Optional[Dict[str, Dict[str, Any]]] = None,
 ) -> bool:
-    """Save complaints data to a CSV file.
-
-    Creates the destination directory (e.g. data/) if it does not exist.
-    Encodes status_history timeline into JSON within the CSV row. Catches
-    OSError/IOError exceptions to prevent application crashes.
-
-    Args:
-        filepath: Target CSV file path (defaults to 'data/complaints.csv').
-        complaints_dict: Optional dictionary of complaints. If omitted, uses global store.
-
-    Returns:
-        True if successfully saved, False if an I/O error occurred.
-    """
+    """Save complaints data to CSV file."""
     if complaints_dict is None:
         complaints_dict = complaint_manager.get_all_complaints()
 
     try:
-        # Ensure parent directory exists
         parent_dir = os.path.dirname(filepath)
         if parent_dir and not os.path.exists(parent_dir):
             os.makedirs(parent_dir, exist_ok=True)
@@ -59,7 +49,6 @@ def save_complaints_to_csv(
             writer.writeheader()
 
             for record in complaints_dict.values():
-                # Prepare row data with clean representations
                 history = record.get("status_history", [])
                 history_json = json.dumps(history)
 
@@ -72,6 +61,10 @@ def save_complaints_to_csv(
                     "priority": record.get("priority", "MEDIUM"),
                     "status": record.get("status", "REGISTERED"),
                     "assigned_to": record.get("assigned_to") or "",
+                    "location": record.get("location", "Downtown Central"),
+                    "latitude": record.get("latitude", 17.3850),
+                    "longitude": record.get("longitude", 78.4867),
+                    "is_critical_crime": "1" if record.get("is_critical_crime") else "0",
                     "date_registered": record.get("date_registered", ""),
                     "date_resolved": record.get("date_resolved") or "",
                     "status_history": history_json,
@@ -88,20 +81,8 @@ def save_complaints_to_csv(
 def load_complaints_from_csv(
     filepath: str = DEFAULT_COMPLAINTS_FILE,
 ) -> Dict[str, Dict[str, Any]]:
-    """Load complaints data from a CSV file into the complaint manager.
-
-    Deserializes status_history timelines and updates the internal ID counter
-    so new registrations never conflict with loaded records. Catches OSError/IOError
-    gracefully.
-
-    Args:
-        filepath: Source CSV file path (defaults to 'data/complaints.csv').
-
-    Returns:
-        Dictionary of loaded complaints keyed by Complaint ID.
-    """
+    """Load complaints data from a CSV file into the complaint manager."""
     if not os.path.exists(filepath):
-        # File doesn't exist yet, return empty store
         return complaint_manager.get_all_complaints()
 
     loaded_records: Dict[str, Dict[str, Any]] = {}
@@ -114,17 +95,24 @@ def load_complaints_from_csv(
                 if not cid:
                     continue
 
-                # Parse JSON status history
                 history_raw = row.get("status_history", "[]")
                 try:
                     history_list = json.loads(history_raw)
-                    # Ensure tuples of (status, timestamp)
                     history = [(item[0], item[1]) for item in history_list if len(item) == 2]
                 except (json.JSONDecodeError, TypeError, IndexError):
                     history = [("REGISTERED", row.get("date_registered", ""))]
 
                 assigned = row.get("assigned_to", "").strip() or None
                 date_res = row.get("date_resolved", "").strip() or None
+
+                # Parse location coordinates
+                try:
+                    lat = float(row.get("latitude", 17.3850))
+                    lon = float(row.get("longitude", 78.4867))
+                except (ValueError, TypeError):
+                    lat, lon = 17.3850, 78.4867
+
+                is_critical = row.get("is_critical_crime") in ("1", "True", "true", True)
 
                 record: Dict[str, Any] = {
                     "complaint_id": cid,
@@ -135,13 +123,16 @@ def load_complaints_from_csv(
                     "priority": row.get("priority", "MEDIUM").strip().upper(),
                     "status": row.get("status", "REGISTERED").strip().upper(),
                     "assigned_to": assigned,
+                    "location": row.get("location", "Downtown Central").strip(),
+                    "latitude": lat,
+                    "longitude": lon,
+                    "is_critical_crime": is_critical,
                     "date_registered": row.get("date_registered", "").strip(),
                     "date_resolved": date_res,
                     "status_history": history,
                 }
                 loaded_records[cid] = record
 
-        # Populate in-memory store and synchronize counter
         complaints_store = complaint_manager.get_all_complaints()
         complaints_store.clear()
         complaints_store.update(loaded_records)

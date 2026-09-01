@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Complaint & Crime Zone Tracking System</title>
+  <meta name="description" content="Municipal public service and crime incident tracking portal with high crime red zone mapping, emergency crime prioritization, and solved case visualizer.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet GIS Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 19 8.5 19 15.5 12 22 5 15.5 5 8.5 12 2"></polygon>
+            <line x1="12" y1="22" x2="12" y2="15.5"></line>
+            <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+            <polyline points="2 15.5 12 8.5 22 15.5"></polyline>
+            <line x1="12" y1="2" x2="12" y2="8.5"></line>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Crime Radar & Complaint Tracking System</h1>
+          <p class="brand-subtitle">High Crime Red Zone Heatmap • Incident Dispatch • Solved Cases Registry</p>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" role="tablist">
+        <button class="tab-btn active" data-tab="map" id="tabMapBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+          Crime & Incident Map
+        </button>
+        <button class="tab-btn" data-tab="registry" id="tabRegistryBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+          Complaints Ledger
+        </button>
+        <button class="tab-btn" data-tab="analytics" id="tabAnalyticsBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Analytics & Reports
+        </button>
+        <button class="tab-btn" data-tab="categories" id="tabCategoriesBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Departments
+        </button>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn btn-primary" id="openRegisterModalBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Report Incident / Complaint
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-main">
+    <!-- Top KPI Metrics Banner -->
+    <section class="kpi-grid">
+      <div class="kpi-card" data-filter="ALL" id="kpiTotal">
+        <div class="kpi-icon icon-blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Total Incidents</span>
+          <span class="kpi-value" id="kpiTotalVal">0</span>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-card-alert" data-filter="CRITICAL" id="kpiCritical">
+        <div class="kpi-icon icon-red pulse-animation">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Severe Violent Crimes</span>
+          <span class="kpi-value" id="kpiCriticalVal">0</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" data-filter="PENDING" id="kpiPending">
+        <div class="kpi-icon icon-amber">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Active / In-Progress</span>
+          <span class="kpi-value" id="kpiPendingVal">0</span>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-card-solved" data-filter="RESOLVED" id="kpiResolved">
+        <div class="kpi-icon icon-emerald">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Solved Cases (Green)</span>
+          <span class="kpi-value" id="kpiResolvedVal">0</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiAvgTime">
+        <div class="kpi-icon icon-purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Avg Resolution</span>
+          <span class="kpi-value" id="kpiAvgTimeVal">0.0h</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 1: Live Interactive Crime & Incident Map View -->
+    <section class="tab-content active" id="tabMap">
+      <div class="map-view-layout">
+        <!-- Main Map Container -->
+        <div class="map-panel">
+          <div class="map-toolbar">
+            <div class="map-title-group">
+              <span class="live-radar-dot"></span>
+              <span class="map-title">Citywide Incident GIS Radar</span>
+            </div>
+
+            <!-- Map Filter Chips -->
+            <div class="map-filter-chips">
+              <button class="filter-chip active" data-map-filter="ALL" id="mapFilterAll">
+                🌐 All Incidents (<span id="countMapAll">0</span>)
+              </button>
+              <button class="filter-chip chip-red" data-map-filter="RED_ZONES" id="mapFilterRed">
+                🔴 High Crime Red Zones (<span id="countMapRed">0</span>)
+              </button>
+              <button class="filter-chip chip-green" data-map-filter="SOLVED" id="mapFilterSolved">
+                🟢 Solved Cases Only (<span id="countMapSolved">0</span>)
+              </button>
+              <button class="filter-chip chip-amber" data-map-filter="ACTIVE_ROUTINE" id="mapFilterActive">
+                🟠 Active Municipal (<span id="countMapActive">0</span>)
+              </button>
+            </div>
+          </div>
+
+          <!-- Leaflet GIS Map Canvas -->
+          <div id="crimeMapCanvas" class="crime-map-canvas"></div>
+
+          <!-- Map Legend Bar -->
+          <div class="map-legend">
+            <div class="legend-item"><span class="legend-dot dot-red pulse-dot"></span> <strong>Red Hotspot Circle</strong>: High Crime Red Zone (Murder/Rape/Assault Threat)</div>
+            <div class="legend-item"><span class="legend-dot dot-red-pin"></span> <strong>Red Pin</strong>: Critical Violent Crime / Escalated</div>
+            <div class="legend-item"><span class="legend-dot dot-amber-pin"></span> <strong>Amber Pin</strong>: Active / Under Investigation</div>
+            <div class="legend-item"><span class="legend-dot dot-green-pin"></span> <strong>Green Pin</strong>: Solved / Closed Case</div>
+          </div>
+        </div>
+
+        <!-- Zone Threat & Hotspot Leaderboard Sidebar -->
+        <div class="zone-sidebar">
+          <div class="zone-sidebar-header">
+            <h3 class="sidebar-heading">Zone Threat Hotspots</h3>
+            <span class="threat-badge-live">Live Threat Index</span>
+          </div>
+
+          <div class="zone-cards-list" id="zoneThreatCardsList">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: Complaints Registry Table View -->
+    <section class="tab-content" id="tabRegistry">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Active Incident & Complaint Ledger</h2>
+            <p class="panel-desc">Searchable database of all citizen reports, severe crimes, and solved cases.</p>
+          </div>
+
+          <div class="filter-controls">
+            <div class="search-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="searchInput" placeholder="Search by ID, zone, crime, citizen..." autocomplete="off">
+            </div>
+
+            <select id="statusFilter" class="select-input">
+              <option value="ALL">All Statuses</option>
+              <option value="REGISTERED">Registered</option>
+              <option value="ASSIGNED">Assigned</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="ESCALATED">Escalated (Urgent)</option>
+              <option value="RESOLVED">Resolved / Solved</option>
+              <option value="CLOSED">Closed</option>
+            </select>
+
+            <select id="priorityFilter" class="select-input">
+              <option value="ALL">All Priorities</option>
+              <option value="HIGH">High (Critical Violent Crime)</option>
+              <option value="MEDIUM">Medium Priority</option>
+              <option value="LOW">Low Priority</option>
+            </select>
+
+            <button class="btn btn-secondary" id="refreshBtn" title="Refresh records">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="data-table" id="complaintsTable">
+            <thead>
+              <tr>
+                <th>Complaint ID</th>
+                <th>Complainant</th>
+                <th>Category & Department</th>
+                <th>Location / Zone</th>
+                <th>Description</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Assigned Officer</th>
+                <th>Registered</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="complaintsTableBody">
+              <!-- Rendered via JavaScript -->
+            </tbody>
+          </table>
+          <div class="empty-state hidden" id="emptyState">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <p>No complaints match the selected filter criteria.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 3: Analytics & Reports View -->
+    <section class="tab-content" id="tabAnalytics">
+      <div class="analytics-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Crime & Incident Category Breakdown</h2>
+            <p class="panel-desc">Incident frequency across violent crime & municipal domains</p>
+          </div>
+          <div class="bars-container" id="categoryDistributionBars"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Departmental Workload & Special Units</h2>
+            <p class="panel-desc">Cases handled by Homicide, Women Protection, & Municipal Depts</p>
+          </div>
+          <div class="bars-container" id="departmentWorkloadBars"></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top: 1.5rem;">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Official Executive Summary Report</h2>
+            <p class="panel-desc">Official administrative intelligence digest and resolution audit</p>
+          </div>
+          <div>
+            <button class="btn btn-secondary" id="copySummaryReportBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copy Digest
+            </button>
+          </div>
+        </div>
+        <pre class="report-box" id="summaryReportPre">Loading executive digest...</pre>
+      </div>
+    </section>
+
+    <!-- Tab 4: Categories & Departments View -->
+    <section class="tab-content" id="tabCategories">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Departmental Routing Rules & Law Enforcement Cells</h2>
+            <p class="panel-desc">Specialized division dispatch for violent crime & municipal emergencies</p>
+          </div>
+          <button class="btn btn-primary" id="openAddCategoryModalBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add New Category
+          </button>
+        </div>
+
+        <div class="category-grid" id="categoryCardsGrid"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal 1: Register New Complaint / Crime Report with Interactive Map -->
+  <div class="modal-backdrop hidden" id="registerModal">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3 class="modal-title">Register Incident & Drop Map Pin</h3>
+          <p class="modal-subtitle">File citizen complaint or report crime incident with exact GPS map location</p>
+        </div>
+        <button class="close-modal-btn" data-close="registerModal">&times;</button>
+      </div>
+
+      <form id="registerForm" class="modal-body modal-grid-layout">
+        <!-- Left Side: Form Details -->
+        <div class="detail-left-col">
+          <div class="form-group">
+            <label for="complainantName" class="form-label">Complainant / Reporting Officer Name *</label>
+            <input type="text" id="complainantName" class="form-input" placeholder="e.g. Officer James Gordon" required>
+          </div>
+
+          <div class="form-group">
+            <label for="complaintCategory" class="form-label">Incident Category *</label>
+            <select id="complaintCategory" class="form-input" required></select>
+          </div>
+
+          <!-- Severe Crime Alert Banner -->
+          <div class="crime-alert-banner hidden" id="criticalCrimeAlertBox">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <div>
+              <strong>CRITICAL VIOLENT CRIME ALERT:</strong>
+              <p>Priority elevated to HIGH. Dispatched to Special Crime Investigation Cell.</p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="complaintPriority" class="form-label">Priority Level</label>
+              <select id="complaintPriority" class="form-input">
+                <option value="LOW">Low (Routine)</option>
+                <option value="MEDIUM" selected>Medium (Standard)</option>
+                <option value="HIGH">High (Critical / Emergency)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="complaintLocation" class="form-label">Zone / Ward *</label>
+              <select id="complaintLocation" class="form-input" required>
+                <option value="Downtown Central">Downtown Central</option>
+                <option value="Old City Sector">Old City Sector</option>
+                <option value="North Industrial Ward">North Industrial Ward</option>
+                <option value="West Tech Corridor">West Tech Corridor</option>
+                <option value="East Suburbs & Highway">East Suburbs & Highway</option>
+                <option value="South Metro District">South Metro District</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="routing-preview" id="routingPreviewBox">
+            <span class="preview-label">Dispatched Department:</span>
+            <span class="preview-value" id="routingPreviewDept">Special Crime Unit</span>
+          </div>
+
+          <div class="form-group">
+            <label for="complaintDescription" class="form-label">Incident Description & Specific Landmark *</label>
+            <textarea id="complaintDescription" class="form-input form-textarea" rows="3" placeholder="Specify crime details, suspect descriptions, weapon involvement, and landmark..." required></textarea>
+          </div>
+        </div>
+
+        <!-- Right Side: Interactive Location Pin Drop Map -->
+        <div class="detail-right-col">
+          <div class="map-picker-card">
+            <div class="map-picker-header">
+              <span class="form-label">📍 Click on Map to Drop Incident Pin:</span>
+              <span class="gps-badge" id="gpsBadge">Lat: 17.3850, Lon: 78.4867</span>
+            </div>
+            
+            <div id="pickerMapCanvas" class="picker-map-canvas"></div>
+            <p class="map-hint-text">💡 Tap anywhere inside the city map to position the exact incident location marker.</p>
+
+            <input type="hidden" id="selectedLat" value="17.3850">
+            <input type="hidden" id="selectedLon" value="78.4867">
+          </div>
+        </div>
+
+        <div class="modal-footer" style="grid-column: 1 / -1;">
+          <button type="button" class="btn btn-secondary" data-close="registerModal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submitRegisterBtn">Submit & Broadcast on Map</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Lifecycle Management & Detailed Audit Timeline -->
+  <div class="modal-backdrop hidden" id="detailModal">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="detail-id-tag" id="detailModalId">CMP1001</div>
+          <h3 class="modal-title" id="detailModalComplainant">Alice Johnson</h3>
+          <p class="modal-subtitle" id="detailModalCategoryDept">Water Supply • Water Works Department</p>
+        </div>
+        <button class="close-modal-btn" data-close="detailModal">&times;</button>
+      </div>
+
+      <div class="modal-body modal-grid-layout">
+        <div class="detail-left-col">
+          <div class="info-card">
+            <h4 class="info-card-heading">Incident Overview & Location</h4>
+            <div class="info-key-val">
+              <span class="key">Location Zone & GPS</span>
+              <p class="val" id="detailModalLocation" style="color:var(--blue);"></p>
+            </div>
+            <div class="info-key-val">
+              <span class="key">Description</span>
+              <p class="val description-val" id="detailModalDesc"></p>
+            </div>
+            <div class="info-grid-2">
+              <div class="info-key-val">
+                <span class="key">Priority Level</span>
+                <span class="val" id="detailModalPriority"></span>
+              </div>
+              <div class="info-key-val">
+                <span class="key">Current Status</span>
+                <span class="val" id="detailModalStatus"></span>
+              </div>
+              <div class="info-key-val">
+                <span class="key">Registered Date</span>
+                <span class="val" id="detailModalDateReg"></span>
+              </div>
+              <div class="info-key-val">
+                <span class="key">Resolved Date</span>
+                <span class="val" id="detailModalDateRes"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-card">
+            <h4 class="info-card-heading">Investigative Actions</h4>
+            <div class="form-group">
+              <label for="assignStaffInput" class="form-label">Assign Lead Investigator / Officer</label>
+              <div class="input-with-action">
+                <input type="text" id="assignStaffInput" class="form-input" placeholder="e.g. Detective Miller">
+                <button class="btn btn-secondary" id="saveAssignBtn">Assign</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="updateStatusSelect" class="form-label">Update Case Status</label>
+              <div class="input-with-action">
+                <select id="updateStatusSelect" class="form-input">
+                  <option value="REGISTERED">REGISTERED</option>
+                  <option value="ASSIGNED">ASSIGNED</option>
+                  <option value="IN_PROGRESS">IN_PROGRESS</option>
+                  <option value="ESCALATED">ESCALATED</option>
+                  <option value="RESOLVED">RESOLVED (Solved Case)</option>
+                  <option value="CLOSED">CLOSED</option>
+                </select>
+                <button class="btn btn-secondary" id="saveStatusBtn">Update</button>
+              </div>
+            </div>
+
+            <div class="quick-actions-row">
+              <button class="btn btn-danger-outline" id="escalateActionBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                Escalate Case
+              </button>
+              <button class="btn btn-success-outline" id="quickResolveBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Mark Case Solved
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-right-col">
+          <div class="timeline-panel">
+            <h4 class="info-card-heading">Lifecycle Audit Trail & Evidence Log</h4>
+            <div class="timeline-container" id="detailTimelineContainer"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="viewDetailPlainReportBtn">Print Text Report</button>
+        <button class="btn btn-primary" data-close="detailModal">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Add Custom Category -->
+  <div class="modal-backdrop hidden" id="addCategoryModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3 class="modal-title">Add Incident Category</h3>
+          <p class="modal-subtitle">Configure routing for a new municipal category</p>
+        </div>
+        <button class="close-modal-btn" data-close="addCategoryModal">&times;</button>
+      </div>
+
+      <form id="addCategoryForm" class="modal-body">
+        <div class="form-group">
+          <label for="newCategoryName" class="form-label">Category Name *</label>
+          <input type="text" id="newCategoryName" class="form-input" placeholder="e.g. Traffic Violations" required>
+        </div>
+
+        <div class="form-group">
+          <label for="newDeptName" class="form-label">Responsible Department *</label>
+          <input type="text" id="newDeptName" class="form-input" placeholder="e.g. Traffic Enforcement Command" required>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="addCategoryModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Leaflet GIS Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>

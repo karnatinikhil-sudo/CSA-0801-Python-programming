@@ -1,11 +1,11 @@
 """Category and department management for the Complaint System.
 
-This module maintains the collection of recognized complaint categories (as a set)
+This module maintains the collection of recognized complaint and crime categories (as a set)
 and provides routing mechanisms to automatically assign complaints to responsible
-departments via category-to-department mappings.
+departments via category-to-department mappings, with specialized routing for critical crimes.
 """
 
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Tuple
 
 # Internal data structures
 categories: Set[str] = set()
@@ -14,14 +14,32 @@ category_department_map: Dict[str, str] = {}
 # Default department when category is unmapped
 DEFAULT_DEPARTMENT: str = "General Administration"
 
-# Initial seed data for standard municipal / organizational workflows
+# Critical violent crime categories that trigger high-priority alerts
+CRITICAL_CRIME_CATEGORIES: Tuple[str, ...] = (
+    "Homicide & Murder",
+    "Sexual Assault & Harassment",
+    "Armed Robbery & Gang Crime",
+    "Kidnapping & Human Trafficking",
+    "Violent Assault & Battery",
+)
+
+# Initial seed data for standard municipal and law enforcement workflows
 _DEFAULT_MAPPINGS: Dict[str, str] = {
+    # High-Priority Critical Crime Categories
+    "Homicide & Murder": "Special Crime Investigation & Homicide Unit",
+    "Sexual Assault & Harassment": "Women & Child Protection Cell",
+    "Armed Robbery & Gang Crime": "Anti-Robbery & Special Operations",
+    "Kidnapping & Human Trafficking": "Anti-Human Trafficking & Rescue Unit",
+    "Violent Assault & Battery": "Municipal Police & Law Enforcement",
+    "Cyber Crime & Fraud": "Cyber Crime Investigation Cell",
+    "Public Safety": "Municipal Police & Safety",
+    "Public Safety & Weapons": "Municipal Police & Safety",
+    # Public Service & Municipal Categories
     "Water Supply": "Water Works Department",
     "Electricity": "Power & Electricity Department",
     "Sanitation": "Public Health & Sanitation",
     "Roads & Infrastructure": "Public Works Department",
     "Billing & Accounts": "Finance & Revenue Department",
-    "Public Safety": "Municipal Police & Safety",
 }
 
 
@@ -40,18 +58,7 @@ _initialize_defaults()
 
 
 def add_category(category_name: str, department_name: str) -> None:
-    """Add a new complaint category and map it to a responsible department.
-
-    Validates and normalizes the input strings before adding them to the category
-    set and department dictionary.
-
-    Args:
-        category_name: The name of the complaint category (e.g., 'Sanitation').
-        department_name: The department responsible for handling this category.
-
-    Raises:
-        ValueError: If category_name or department_name is empty or whitespace.
-    """
+    """Add a new complaint category and map it to a responsible department."""
     cleaned_category = category_name.strip().title()
     cleaned_department = department_name.strip().title()
 
@@ -60,44 +67,29 @@ def add_category(category_name: str, department_name: str) -> None:
     if not cleaned_department:
         raise ValueError("Department name cannot be empty.")
 
-    # Add to categories set
     categories.add(cleaned_category)
-    # Map category to department
     category_department_map[cleaned_category] = cleaned_department
 
 
 def list_categories() -> List[str]:
-    """Retrieve an alphabetically sorted list of all active categories.
-
-    Returns:
-        A list of category names stored in the categories set.
-    """
+    """Retrieve an alphabetically sorted list of all active categories."""
     return sorted(list(categories))
 
 
 def get_department(category_name: str) -> str:
-    """Look up the responsible department for a given complaint category.
-
-    If the category has an explicit mapping, that department is returned.
-    If the category is recognized or unknown without an explicit map,
-    returns the default department.
-
-    Args:
-        category_name: The category to look up.
-
-    Returns:
-        The name of the responsible department.
-    """
+    """Look up the responsible department for a given complaint category."""
     cleaned = category_name.strip().title()
     return category_department_map.get(cleaned, DEFAULT_DEPARTMENT)
 
 
-def get_all_category_mappings() -> Dict[str, str]:
-    """Retrieve a copy of all category-to-department mappings.
+def is_critical_crime_category(category_name: str) -> bool:
+    """Check if category is a critical high-priority violent crime."""
+    cleaned = category_name.strip().title()
+    return cleaned in [c.title() for c in CRITICAL_CRIME_CATEGORIES]
 
-    Returns:
-        A dictionary mapping category names to department names.
-    """
+
+def get_all_category_mappings() -> Dict[str, str]:
+    """Retrieve a copy of all category-to-department mappings."""
     return dict(category_department_map)
 
 

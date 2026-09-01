@@ -1,0 +1,4 @@
+complaint_id,complainant,category,department,description,priority,status,assigned_to,date_registered,date_resolved,status_history
+CMP1001,Alice Johnson,Billing & Accounts,Finance & Revenue Department,Major pipeline leak on 4th cross road causing water loss.,HIGH,RESOLVED,Officer Dave Williams,2026-09-01 08:54:30,2026-09-01 08:54:30,"[[""REGISTERED"", ""2026-09-01 08:54:30""], [""ASSIGNED"", ""2026-09-01 08:54:30""], [""RESOLVED"", ""2026-09-01 08:54:30""]]"
+CMP1002,Bob Martinez,Electricity,Power & Electricity Department,Frequent power fluctuations damaging household appliances.,HIGH,ESCALATED,,2026-09-01 08:54:30,,"[[""REGISTERED"", ""2026-09-01 08:54:30""], [""ESCALATED"", ""2026-09-01 08:54:30""]]"
+CMP1003,Carol Danvers,Public Safety,Municipal Police & Safety,Community garbage bin uncollected for 5 days.,LOW,REGISTERED,,2026-09-01 08:54:30,,"[[""REGISTERED"", ""2026-09-01 08:54:30""]]"

@@ -1,6 +1,6 @@
-"""Digital Complaint Registration and Tracking System (Single-File Distribution).
+"""Digital Complaint Registration and Tracking System (Single-File Distribution - Chennai Edition).
 
-A comprehensive Python 3 console application for public service complaint registration,
+A comprehensive Python 3 console application for public service and crime tracking across Chennai,
 category-to-department routing, lifecycle tracking, escalation, statistical analytics,
 plain-text reporting, and CSV data persistence.
 
@@ -11,6 +11,7 @@ import csv
 from datetime import datetime
 import json
 import os
+import random
 import sys
 import tempfile
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -82,13 +83,28 @@ categories: Set[str] = set()
 category_department_map: Dict[str, str] = {}
 DEFAULT_DEPARTMENT: str = "General Administration"
 
+CRITICAL_CRIME_CATEGORIES: Tuple[str, ...] = (
+    "Homicide & Murder",
+    "Sexual Assault & Harassment",
+    "Armed Robbery & Gang Crime",
+    "Kidnapping & Human Trafficking",
+    "Violent Assault & Battery",
+)
+
 _DEFAULT_MAPPINGS: Dict[str, str] = {
+    "Homicide & Murder": "Special Crime Investigation & Homicide Unit",
+    "Sexual Assault & Harassment": "Women & Child Protection Cell",
+    "Armed Robbery & Gang Crime": "Anti-Robbery & Special Operations",
+    "Kidnapping & Human Trafficking": "Anti-Human Trafficking & Rescue Unit",
+    "Violent Assault & Battery": "Municipal Police & Law Enforcement",
+    "Cyber Crime & Fraud": "Cyber Crime Investigation Cell",
+    "Public Safety": "Municipal Police & Safety",
+    "Public Safety & Weapons": "Municipal Police & Safety",
     "Water Supply": "Water Works Department",
     "Electricity": "Power & Electricity Department",
     "Sanitation": "Public Health & Sanitation",
     "Roads & Infrastructure": "Public Works Department",
     "Billing & Accounts": "Finance & Revenue Department",
-    "Public Safety": "Municipal Police & Safety",
 }
 
 
@@ -130,13 +146,19 @@ def get_department(category_name: str) -> str:
     return category_department_map.get(cleaned, DEFAULT_DEPARTMENT)
 
 
+def is_critical_crime_category(category_name: str) -> bool:
+    """Check if category is a critical high-priority violent crime."""
+    cleaned = category_name.strip().title()
+    return cleaned in [c.title() for c in CRITICAL_CRIME_CATEGORIES]
+
+
 def get_all_category_mappings() -> Dict[str, str]:
     """Retrieve a copy of all category-to-department mappings."""
     return dict(category_department_map)
 
 
 # =============================================================================
-# 3. COMPLAINT MANAGER & DATA STORE
+# 3. COMPLAINT MANAGER & DATA STORE (CHENNAI METROPOLITAN GRID)
 # =============================================================================
 
 complaints: Dict[str, Dict[str, Any]] = {}
@@ -144,6 +166,38 @@ _complaint_counter: int = 1000
 
 VALID_PRIORITIES: Tuple[str, ...] = ("LOW", "MEDIUM", "HIGH")
 DEFAULT_PRIORITY: str = "MEDIUM"
+
+CRITICAL_CRIME_KEYWORDS: Tuple[str, ...] = (
+    "murder",
+    "homicide",
+    "rape",
+    "sexual assault",
+    "molestation",
+    "kidnapping",
+    "hostage",
+    "armed robbery",
+    "gunshot",
+    "knife attack",
+    "stabbing",
+    "extortion",
+)
+
+# Chennai Metropolitan Zones with accurate GPS coordinates
+ZONE_COORDINATES: Dict[str, Tuple[float, float]] = {
+    "T. Nagar": (13.0418, 80.2341),
+    "George Town / Parrys": (13.0900, 80.2900),
+    "Marina Beach & Triplicane": (13.0500, 80.2824),
+    "Anna Nagar": (13.0850, 80.2101),
+    "Velachery": (12.9815, 80.2180),
+    "OMR IT Corridor": (12.9352, 80.2312),
+    "Guindy & Alandur": (13.0067, 80.2024),
+    "Adyar & Besant Nagar": (13.0012, 80.2565),
+    "Koyambedu": (13.0694, 80.1948),
+    "Tambaram": (12.9249, 80.1472),
+}
+
+DEFAULT_LOCATION = "T. Nagar"
+DEFAULT_COORDS = (13.0418, 80.2341)
 
 
 def _generate_complaint_id() -> str:
@@ -169,16 +223,28 @@ def sync_counter_from_existing() -> None:
     _complaint_counter = max_val
 
 
+def get_zone_coordinates(zone_name: str) -> Tuple[float, float]:
+    """Get latitude and longitude for a given Chennai zone."""
+    base = ZONE_COORDINATES.get(zone_name, DEFAULT_COORDS)
+    lat = round(base[0] + random.uniform(-0.005, 0.005), 6)
+    lon = round(base[1] + random.uniform(-0.005, 0.005), 6)
+    return (lat, lon)
+
+
 def register_complaint(
     name: str,
     category: str,
     description: str,
     priority: str = DEFAULT_PRIORITY,
+    location: str = DEFAULT_LOCATION,
+    latitude: Optional[float] = None,
+    longitude: Optional[float] = None,
 ) -> str:
-    """Register a new complaint, defaulting invalid priority to MEDIUM safely."""
+    """Register a new complaint or criminal incident in Chennai."""
     cleaned_name = str(name).strip().title()
     cleaned_category = str(category).strip().title()
     cleaned_description = str(description).strip()
+    cleaned_location = str(location).strip() if location else DEFAULT_LOCATION
 
     if not cleaned_name:
         raise ValueError("Complainant name cannot be empty.")
@@ -187,11 +253,27 @@ def register_complaint(
     if not cleaned_description:
         raise ValueError("Complaint description cannot be empty.")
 
-    normalized_priority = str(priority).strip().upper()
-    if normalized_priority not in VALID_PRIORITIES:
-        normalized_priority = DEFAULT_PRIORITY
+    desc_lower = cleaned_description.lower()
+    is_critical_crime = (
+        is_critical_crime_category(cleaned_category)
+        or any(keyword in desc_lower for keyword in CRITICAL_CRIME_KEYWORDS)
+        or any(keyword in cleaned_category.lower() for keyword in CRITICAL_CRIME_KEYWORDS)
+    )
+
+    if is_critical_crime:
+        normalized_priority = "HIGH"
+    else:
+        normalized_priority = str(priority).strip().upper()
+        if normalized_priority not in VALID_PRIORITIES:
+            normalized_priority = DEFAULT_PRIORITY
 
     department = get_department(cleaned_category)
+
+    if latitude is None or longitude is None:
+        lat, lon = get_zone_coordinates(cleaned_location)
+    else:
+        lat, lon = float(latitude), float(longitude)
+
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     complaint_id = _generate_complaint_id()
 
@@ -204,6 +286,10 @@ def register_complaint(
         "priority": normalized_priority,
         "status": "REGISTERED",
         "assigned_to": None,
+        "location": cleaned_location,
+        "latitude": lat,
+        "longitude": lon,
+        "is_critical_crime": is_critical_crime,
         "date_registered": now_str,
         "date_resolved": None,
         "status_history": [("REGISTERED", now_str)],
@@ -344,7 +430,7 @@ def search_complaints_by_status(
 
 
 def category_frequency(complaints_dict: Optional[Dict[str, Dict[str, Any]]] = None) -> Dict[str, int]:
-    """Calculate the frequency distribution of complaints across categories."""
+    """Calculate frequency distribution of complaints across categories."""
     store = complaints_dict if complaints_dict is not None else complaints
     freq: Dict[str, int] = {}
     for rec in store.values():
@@ -399,6 +485,65 @@ def overdue_complaints(
     return overdue_list
 
 
+def zone_crime_statistics(complaints_dict: Optional[Dict[str, Dict[str, Any]]] = None) -> Dict[str, Any]:
+    """Analyze Chennai crime density, critical violent crimes, and threat levels."""
+    store = complaints_dict if complaints_dict is not None else complaints
+    zones_map: Dict[str, Dict[str, Any]] = {}
+
+    for zone_name, (lat, lon) in ZONE_COORDINATES.items():
+        zones_map[zone_name] = {
+            "zone_name": zone_name,
+            "center": [lat, lon],
+            "total_cases": 0,
+            "active_pending": 0,
+            "active_critical_crimes": 0,
+            "solved_cases": 0,
+            "threat_score": 0.0,
+            "threat_level": "GREEN_SAFE",
+        }
+
+    for record in store.values():
+        zone = record.get("location", DEFAULT_LOCATION)
+        if zone not in zones_map:
+            lat = record.get("latitude", DEFAULT_COORDS[0])
+            lon = record.get("longitude", DEFAULT_COORDS[1])
+            zones_map[zone] = {
+                "zone_name": zone,
+                "center": [lat, lon],
+                "total_cases": 0,
+                "active_pending": 0,
+                "active_critical_crimes": 0,
+                "solved_cases": 0,
+                "threat_score": 0.0,
+                "threat_level": "GREEN_SAFE",
+            }
+
+        z = zones_map[zone]
+        z["total_cases"] += 1
+        st = record.get("status", "").upper()
+        is_critical = record.get("is_critical_crime", False) or record.get("priority", "") == "HIGH"
+
+        if st in RESOLVED_STATUSES:
+            z["solved_cases"] += 1
+        else:
+            z["active_pending"] += 1
+            if is_critical:
+                z["active_critical_crimes"] += 1
+
+    for z in zones_map.values():
+        score = (z["active_critical_crimes"] * 5.0) + (z["active_pending"] * 1.5)
+        z["threat_score"] = round(score, 1)
+
+        if z["active_critical_crimes"] >= 2 or score >= 8.0:
+            z["threat_level"] = "RED_HOTSPOT"
+        elif score >= 3.0:
+            z["threat_level"] = "AMBER_MODERATE"
+        else:
+            z["threat_level"] = "GREEN_SAFE"
+
+    return zones_map
+
+
 # =============================================================================
 # 6. REPORTS GENERATION
 # =============================================================================
@@ -412,6 +557,7 @@ def generate_complaint_report(complaint_id: str) -> str:
     name = record.get("complainant", "Unknown")
     cat = record.get("category", "Unspecified")
     dept = record.get("department", "Unassigned")
+    loc = record.get("location", "Chennai City")
     desc = record.get("description", "No description provided.")
     priority = record.get("priority", "MEDIUM")
     status = record.get("status", "REGISTERED")
@@ -428,6 +574,7 @@ def generate_complaint_report(complaint_id: str) -> str:
         f" Complainant Name : {name}",
         f" Category         : {cat}",
         f" Department       : {dept}",
+        f" Location / Zone  : {loc}",
         f" Priority Level   : {priority}",
         f" Current Status   : {status}",
         f" Assigned Officer : {assigned_to}",
@@ -473,11 +620,11 @@ def generate_summary_report() -> str:
 
     lines = [
         "=" * 64,
-        "   DIGITAL COMPLAINT SYSTEM - EXECUTIVE SUMMARY REPORT",
+        "   CHENNAI DIGITAL COMPLAINT SYSTEM - EXECUTIVE SUMMARY",
         "=" * 64,
-        f" Total Complaints Registered : {total_count}",
-        f" Pending / In-Progress       : {pending_count}",
-        f" Resolved / Closed           : {resolved_count}",
+        f" Total Incidents Registered  : {total_count}",
+        f" Active / In-Progress        : {pending_count}",
+        f" Solved / Closed             : {resolved_count}",
         f" Average Resolution Time     : {avg_res_time:.2f} hours",
         "-" * 64,
         " Breakdown by Status:",
@@ -501,7 +648,7 @@ def generate_summary_report() -> str:
     else:
         for cat, count in sorted(cat_freq.items()):
             dept = get_department(cat)
-            lines.append(f"   - {cat:<24} ({dept}): {count}")
+            lines.append(f"   - {cat:<26} ({dept}): {count}")
 
     lines.append("=" * 64)
     return "\n".join(lines)
@@ -521,6 +668,10 @@ CSV_FIELDNAMES = [
     "priority",
     "status",
     "assigned_to",
+    "location",
+    "latitude",
+    "longitude",
+    "is_critical_crime",
     "date_registered",
     "date_resolved",
     "status_history",
@@ -555,6 +706,10 @@ def save_complaints_to_csv(
                     "priority": record.get("priority", "MEDIUM"),
                     "status": record.get("status", "REGISTERED"),
                     "assigned_to": record.get("assigned_to") or "",
+                    "location": record.get("location", DEFAULT_LOCATION),
+                    "latitude": record.get("latitude", DEFAULT_COORDS[0]),
+                    "longitude": record.get("longitude", DEFAULT_COORDS[1]),
+                    "is_critical_crime": "1" if record.get("is_critical_crime") else "0",
                     "date_registered": record.get("date_registered", ""),
                     "date_resolved": record.get("date_resolved") or "",
                     "status_history": history_json,
@@ -594,6 +749,14 @@ def load_complaints_from_csv(
                 assigned = row.get("assigned_to", "").strip() or None
                 date_res = row.get("date_resolved", "").strip() or None
 
+                try:
+                    lat = float(row.get("latitude", DEFAULT_COORDS[0]))
+                    lon = float(row.get("longitude", DEFAULT_COORDS[1]))
+                except (ValueError, TypeError):
+                    lat, lon = DEFAULT_COORDS
+
+                is_critical = row.get("is_critical_crime") in ("1", "True", "true", True)
+
                 record: Dict[str, Any] = {
                     "complaint_id": cid,
                     "complainant": row.get("complainant", "").strip(),
@@ -603,6 +766,10 @@ def load_complaints_from_csv(
                     "priority": row.get("priority", "MEDIUM").strip().upper(),
                     "status": row.get("status", "REGISTERED").strip().upper(),
                     "assigned_to": assigned,
+                    "location": row.get("location", DEFAULT_LOCATION).strip(),
+                    "latitude": lat,
+                    "longitude": lon,
+                    "is_critical_crime": is_critical,
                     "date_registered": row.get("date_registered", "").strip(),
                     "date_resolved": date_res,
                     "status_history": history,
@@ -627,14 +794,14 @@ def load_complaints_from_csv(
 def display_menu() -> None:
     """Display the primary CLI menu."""
     print("\n" + "-" * 40)
-    print("               MAIN MENU")
+    print("      CHENNAI COMPLAINT RADAR MENU")
     print("-" * 40)
-    print(" [1] Register New Complaint")
-    print(" [2] Assign / Update Complaint Lifecycle")
+    print(" [1] Register Incident / Complaint (with Chennai Locality)")
+    print(" [2] Assign / Update Incident Lifecycle")
     print(" [3] Search Complaints by Status")
-    print(" [4] View Single Complaint Detail Report")
-    print(" [5] View Executive Summary & Analytics")
-    print(" [6] Manage Categories & Departments")
+    print(" [4] View Single Case Detail Report")
+    print(" [5] View Chennai Citywide Summary & Analytics")
+    print(" [6] View Chennai Zone Threat Index (Red Zones & Solved Cases)")
     print(" [7] Save Data to CSV")
     print(" [8] Exit Program")
     print("-" * 40)
@@ -642,17 +809,18 @@ def display_menu() -> None:
 
 def handle_register() -> None:
     """Handle interactive registration flow."""
-    print("\n--- [1] REGISTER NEW COMPLAINT ---")
-    name = input("Enter Complainant Name: ").strip()
+    print("\n--- [1] REGISTER INCIDENT / COMPLAINT (CHENNAI) ---")
+    name = input("Enter Complainant / Reporting Officer Name: ").strip()
     if not name:
-        print("[Error] Complainant name cannot be empty.")
+        print("[Error] Name cannot be empty.")
         return
 
     available_cats = list_categories()
     print("\nAvailable Categories:")
     for idx, cat in enumerate(available_cats, start=1):
-        dept = get_department(cat)
-        print(f"  ({idx}) {cat:<24} -> Department: {dept}")
+        is_crit = is_critical_crime_category(cat)
+        tag = " ⚠️ [CRITICAL VIOLENT CRIME]" if is_crit else ""
+        print(f"  ({idx}) {cat:<32}{tag}")
 
     cat_input = input("\nEnter Category (Type name or number): ").strip()
     selected_cat = ""
@@ -665,7 +833,18 @@ def handle_register() -> None:
         print("[Error] Category cannot be empty.")
         return
 
-    description = input("Enter Detailed Description: ").strip()
+    print("\nChennai Zones:")
+    zone_names = list(ZONE_COORDINATES.keys())
+    for idx, z in enumerate(zone_names, start=1):
+        print(f"  ({idx}) {z}")
+    loc_input = input("\nSelect Chennai Zone (name or number) [Default: T. Nagar]: ").strip()
+    selected_loc = DEFAULT_LOCATION
+    if loc_input.isdigit() and 1 <= int(loc_input) <= len(zone_names):
+        selected_loc = zone_names[int(loc_input) - 1]
+    elif loc_input:
+        selected_loc = loc_input
+
+    description = input("Enter Incident Description & Landmark: ").strip()
     if not description:
         print("[Error] Description cannot be empty.")
         return
@@ -679,148 +858,41 @@ def handle_register() -> None:
         category=selected_cat,
         description=description,
         priority=priority_input,
+        location=selected_loc,
     )
     rec = get_complaint(cid)
-    print(f"\n[Success] Complaint successfully registered!")
-    print(f"  -> Generated Complaint ID : {cid}")
-    print(f"  -> Routed Department     : {rec.get('department')}")
-    print(f"  -> Assigned Priority      : {rec.get('priority')}")
-    print(f"  -> Status                 : {rec.get('status')}")
+    print(f"\n[Success] Incident successfully registered!")
+    print(f"  -> Generated ID           : {cid}")
+    print(f"  -> Routed Department      : {rec.get('department')}")
+    print(f"  -> Chennai Locality       : {rec.get('location')} (GPS: {rec.get('latitude')}, {rec.get('longitude')})")
+    print(f"  -> Assigned Priority       : {rec.get('priority')}")
+    print(f"  -> Status                  : {rec.get('status')}")
 
 
-def handle_assign_update() -> None:
-    """Handle assignment and lifecycle status updates."""
-    print("\n--- [2] ASSIGN / UPDATE COMPLAINT LIFECYCLE ---")
-    cid = input("Enter Complaint ID (e.g. CMP1001): ").strip().upper()
-    if not cid:
-        print("[Error] Complaint ID is required.")
-        return
-
-    rec = get_complaint(cid)
-    print(f"\nSelected Complaint: {cid} | Current Status: {rec['status']} | Priority: {rec['priority']}")
-    print(f"Complainant: {rec['complainant']} | Department: {rec['department']}")
-    print(f"Assigned To: {rec.get('assigned_to') or 'Unassigned'}")
-
-    print("\nChoose Action:")
-    print(" [1] Assign / Reassign Staff Officer")
-    print(" [2] Update Lifecycle Status")
-    print(" [3] Update Priority Level")
-    print(" [4] Escalate Complaint (High Priority)")
-    print(" [5] Cancel")
-
-    action = input("Select an option (1-5): ").strip()
-
-    if action == "1":
-        officer = input("Enter Officer / Staff Name: ").strip()
-        if not officer:
-            print("[Error] Staff name cannot be empty.")
-            return
-        updated = assign_complaint(cid, officer)
-        print(f"[Success] Assigned to {updated['assigned_to']}. Status updated to {updated['status']}.")
-    elif action == "2":
-        print(f"\nValid Statuses: {', '.join(VALID_STATUSES)}")
-        new_status = input("Enter New Status: ").strip().upper()
-        updated = update_status(cid, new_status)
-        print(f"[Success] Status updated to {updated['status']}.")
-        if updated.get("date_resolved"):
-            print(f"  -> Stamped Resolution Date: {updated['date_resolved']}")
-    elif action == "3":
-        print("Valid Priorities: LOW, MEDIUM, HIGH")
-        new_priority = input("Enter New Priority: ").strip().upper()
-        updated = update_priority(cid, new_priority)
-        print(f"[Success] Priority updated to {updated['priority']}.")
-    elif action == "4":
-        updated = escalate_complaint(cid)
-        print(f"[Success] Complaint {cid} escalated! Status: {updated['status']}, Priority: {updated['priority']}.")
-    elif action == "5":
-        print("Action cancelled.")
-    else:
-        print("[Error] Invalid selection.")
-
-
-def handle_search_by_status() -> None:
-    """Handle filtering complaints by status."""
-    print("\n--- [3] SEARCH COMPLAINTS BY STATUS ---")
-    print(f"Status options: {', '.join(VALID_STATUSES)}")
-    target_status = input("Enter status to filter by: ").strip()
-
-    matches = search_complaints_by_status(target_status)
-    if not matches:
-        print(f"\nNo complaints found matching status: '{target_status}'.")
-        return
-
-    print(f"\nFound {len(matches)} complaint(s) with status '{target_status.upper()}':")
+def handle_view_zones() -> None:
+    """Display Chennai zone threat levels and solved counts."""
+    print("\n--- [6] CHENNAI ZONE THREAT INDEX & HOTSPOTS ---")
+    z_stats = zone_crime_statistics()
     print("-" * 76)
-    print(f"{'ID':<10} {'Complainant':<18} {'Category':<16} {'Priority':<10} {'Assigned To'}")
+    print(f"{'Zone Name':<28} {'Threat Level':<18} {'Violent Crimes':<16} {'Solved'}")
     print("-" * 76)
-    for item in matches:
-        cid = item.get("complaint_id", "")
-        name = item.get("complainant", "")[:16]
-        cat = item.get("category", "")[:14]
-        pri = item.get("priority", "")
-        assigned = item.get("assigned_to") or "Unassigned"
-        print(f"{cid:<10} {name:<18} {cat:<16} {pri:<10} {assigned}")
+    for zname, data in sorted(z_stats.items(), key=lambda x: x[1]['threat_score'], reverse=True):
+        lvl = data['threat_level']
+        lvl_display = "🚨 RED HOTSPOT" if lvl == 'RED_HOTSPOT' else "⚠️ MODERATE" if lvl == 'AMBER_MODERATE' else "🛡️ SAFE ZONE"
+        print(f"{zname:<28} {lvl_display:<18} {data['active_critical_crimes']:<16} {data['solved_cases']}")
     print("-" * 76)
-
-
-def handle_view_complaint_report() -> None:
-    """Handle single complaint report display."""
-    print("\n--- [4] VIEW SINGLE COMPLAINT DETAIL REPORT ---")
-    cid = input("Enter Complaint ID: ").strip().upper()
-    if not cid:
-        print("[Error] Complaint ID is required.")
-        return
-    print("\n" + generate_complaint_report(cid))
-
-
-def handle_view_summary_report() -> None:
-    """Handle summary report display."""
-    print("\n--- [5] EXECUTIVE SUMMARY & ANALYTICS ---")
-    print("\n" + generate_summary_report())
-
-
-def handle_manage_categories() -> None:
-    """Handle category inspection and creation."""
-    print("\n--- [6] MANAGE CATEGORIES & DEPARTMENTS ---")
-    mappings = get_all_category_mappings()
-    print("\nCurrent Category Mappings:")
-    for cat, dept in sorted(mappings.items()):
-        print(f"  - {cat:<24} -> {dept}")
-
-    print("\nActions:")
-    print(" [1] Add New Category & Department Mapping")
-    print(" [2] Return to Main Menu")
-    choice = input("Select option (1-2): ").strip()
-
-    if choice == "1":
-        cat_name = input("Enter New Category Name: ").strip()
-        dept_name = input("Enter Responsible Department: ").strip()
-        if not cat_name or not dept_name:
-            print("[Error] Both category and department names are required.")
-            return
-        add_category(cat_name, dept_name)
-        print(f"[Success] Added category '{cat_name.title()}' mapped to '{dept_name.title()}'.")
-
-
-def handle_save_csv() -> None:
-    """Handle explicit CSV save."""
-    print("\n--- [7] SAVE DATA TO CSV ---")
-    if save_complaints_to_csv():
-        print("[Success] All complaint data successfully saved to 'data/complaints.csv'.")
-    else:
-        print("[Warning] Could not complete CSV save.")
 
 
 def run_interactive_loop() -> None:
-    """Execute the primary interactive application loop."""
+    """Execute primary CLI application loop."""
     print("=" * 68)
-    print("   DIGITAL COMPLAINT REGISTRATION AND TRACKING SYSTEM")
-    print("   Municipal & Public Service Incident Management Console")
+    print("   CHENNAI DIGITAL COMPLAINT & CRIME ZONE TRACKING SYSTEM")
+    print("   Greater Chennai Police & Municipal Command Console")
     print("=" * 68)
 
     loaded = load_complaints_from_csv()
     if loaded:
-        print(f"[Startup] Restored {len(loaded)} complaint record(s) from CSV storage.")
+        print(f"[Startup] Restored {len(loaded)} incident records across Chennai.")
     else:
         print("[Startup] Ready with clean storage.")
 
@@ -828,38 +900,36 @@ def run_interactive_loop() -> None:
         while True:
             display_menu()
             choice = input("\nEnter your choice (1-8): ").strip()
-
             try:
                 if choice == "1":
                     handle_register()
                 elif choice == "2":
-                    handle_assign_update()
+                    cid = input("Enter ID: ").strip().upper()
+                    st = input("Enter new status (REGISTERED/ASSIGNED/IN_PROGRESS/ESCALATED/RESOLVED/CLOSED): ").strip().upper()
+                    update_status(cid, st)
+                    print(f"Updated {cid} to {st}.")
                 elif choice == "3":
-                    handle_search_by_status()
+                    target_status = input("Enter status to filter: ").strip()
+                    matches = search_complaints_by_status(target_status)
+                    print(f"Found {len(matches)} match(es).")
                 elif choice == "4":
-                    handle_view_complaint_report()
+                    cid = input("Enter ID: ").strip().upper()
+                    print(generate_complaint_report(cid))
                 elif choice == "5":
-                    handle_view_summary_report()
+                    print(generate_summary_report())
                 elif choice == "6":
-                    handle_manage_categories()
+                    handle_view_zones()
                 elif choice == "7":
-                    handle_save_csv()
+                    save_complaints_to_csv()
+                    print("Saved to CSV.")
                 elif choice == "8":
-                    print("\nExiting Digital Complaint System. Saving records...")
+                    print("Exiting...")
                     break
-                else:
-                    print("\n[Invalid Selection] Please enter a valid option between 1 and 8.")
-
-            except ComplaintSystemError as c_err:
-                print(f"\n[Complaint System Error] {c_err}")
-            except ValueError as v_err:
-                print(f"\n[Validation Error] {v_err}")
-            except Exception as u_err:
-                print(f"\n[Unexpected Error] {u_err}")
-
+            except Exception as e:
+                print(f"[Error] {e}")
     finally:
         save_complaints_to_csv()
-        print("[Persistence] Auto-save completed. Goodbye!")
+        print("Auto-save completed.")
 
 
 # =============================================================================
@@ -878,26 +948,26 @@ class TestComplaintSystemStandalone(unittest.TestCase):
         clear_complaints()
 
     def test_01_register_valid_complaint(self) -> None:
-        cid = register_complaint("Alice Johnson", "Water Supply", "Low pressure", "HIGH")
+        cid = register_complaint("Murugan", "Water Supply", "Low pressure", "HIGH", location="Velachery")
         self.assertEqual(cid, "CMP1001")
         rec = get_complaint(cid)
         self.assertEqual(rec["status"], "REGISTERED")
-        self.assertEqual(rec["priority"], "HIGH")
+        self.assertEqual(rec["location"], "Velachery")
 
     def test_02_register_invalid_priority_defaults_to_medium(self) -> None:
-        cid = register_complaint("Bob", "Sanitation", "Overflow", "SUPER_URGENT")
+        cid = register_complaint("Kumar", "Sanitation", "Overflow", "SUPER_URGENT", location="T. Nagar")
         rec = get_complaint(cid)
         self.assertEqual(rec["priority"], "MEDIUM")
 
     def test_03_assign_complaint(self) -> None:
-        cid = register_complaint("Charlie", "Electricity", "Outage", "HIGH")
-        updated = assign_complaint(cid, "Officer Dave")
-        self.assertEqual(updated["assigned_to"], "Officer Dave")
+        cid = register_complaint("Karthik", "Electricity", "Outage", "HIGH", location="Anna Nagar")
+        updated = assign_complaint(cid, "Officer Selvam")
+        self.assertEqual(updated["assigned_to"], "Officer Selvam")
         self.assertEqual(updated["status"], "ASSIGNED")
 
     def test_04_full_status_lifecycle(self) -> None:
-        cid = register_complaint("Dave", "Electricity", "Wire spark", "MEDIUM")
-        assign_complaint(cid, "Officer Dave")
+        cid = register_complaint("Priya", "Electricity", "Wire spark", "MEDIUM", location="Guindy & Alandur")
+        assign_complaint(cid, "Officer Selvam")
         update_status(cid, "IN_PROGRESS")
         escalate_complaint(cid)
         update_status(cid, "RESOLVED")
@@ -914,7 +984,7 @@ class TestComplaintSystemStandalone(unittest.TestCase):
             get_complaint("CMP9999")
 
     def test_07_csv_persistence_roundtrip(self) -> None:
-        cid = register_complaint("Grace", "Sanitation", "Litter")
+        cid = register_complaint("Sundaram", "Sanitation", "Litter", location="Marina Beach & Triplicane")
         with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
             tmp_path = tmp.name
         try:
@@ -922,6 +992,7 @@ class TestComplaintSystemStandalone(unittest.TestCase):
             clear_complaints()
             loaded = load_complaints_from_csv(filepath=tmp_path)
             self.assertIn(cid, loaded)
+            self.assertEqual(loaded[cid]["location"], "Marina Beach & Triplicane")
         finally:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)

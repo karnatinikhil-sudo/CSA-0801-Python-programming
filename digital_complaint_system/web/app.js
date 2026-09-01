@@ -171,7 +171,7 @@ function showToast(message, type = 'success') {
 function initMainMap() {
   if (mainMap) return;
 
-  const defaultCenter = [17.3850, 78.4867]; // Center of City
+  const defaultCenter = [13.0418, 80.2341]; // Center of Chennai (T. Nagar)
   mainMap = L.map('crimeMapCanvas', {
     center: defaultCenter,
     zoom: 12,
@@ -192,8 +192,8 @@ function initMainMap() {
 function initPickerMap() {
   if (pickerMap) return;
 
-  const initialLat = parseFloat(elements.selectedLat.value) || 17.3850;
-  const initialLon = parseFloat(elements.selectedLon.value) || 78.4867;
+  const initialLat = parseFloat(elements.selectedLat.value) || 13.0418;
+  const initialLon = parseFloat(elements.selectedLon.value) || 80.2341;
 
   pickerMap = L.map('pickerMapCanvas', {
     center: [initialLat, initialLon],
@@ -251,7 +251,7 @@ function renderCrimeMap() {
 
   // 1. Render Zone Heat Circles (Red for High Threat, Amber for Moderate, Green for Safe)
   for (const [zoneName, zoneData] of Object.entries(state.zones || {})) {
-    const center = zoneData.center || [17.3850, 78.4867];
+    const center = zoneData.center || [13.0418, 80.2341];
     const threat = zoneData.threat_level;
 
     let circleColor = '#10b981'; // Green Safe
@@ -311,8 +311,8 @@ function renderCrimeMap() {
     if (state.mapFilter === 'SOLVED' && !isSolved) return;
     if (state.mapFilter === 'ACTIVE_ROUTINE' && (isCritical || isSolved)) return;
 
-    const lat = item.latitude || 17.3850;
-    const lon = item.longitude || 78.4867;
+    const lat = item.latitude || 13.0418;
+    const lon = item.longitude || 80.2341;
 
     // Marker styling
     let markerClass = 'marker-routine';

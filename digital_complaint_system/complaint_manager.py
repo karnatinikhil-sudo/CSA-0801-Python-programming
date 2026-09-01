@@ -1,8 +1,8 @@
 """Complaint registration and CRUD operations for the Complaint System.
 
 Maintains in-memory dictionary of complaints, auto-generates Complaint IDs (CMP1001),
-handles geographic zoning/coordinates for crime mapping, and enforces mandatory
-high-priority escalation for critical violent crimes (e.g. Homicide, Sexual Assault, Armed Robbery).
+handles geographic zoning/coordinates for Chennai, Tamil Nadu crime mapping, and enforces
+mandatory high-priority escalation for critical violent crimes (Homicide, Sexual Assault, Robbery).
 """
 
 from datetime import datetime
@@ -38,15 +38,22 @@ CRITICAL_CRIME_KEYWORDS: Tuple[str, ...] = (
     "extortion",
 )
 
-# Standard Geographic Zones and baseline GPS coordinates (City Grid)
+# Chennai Metropolitan Zones and accurate GPS coordinates
 ZONE_COORDINATES: Dict[str, Tuple[float, float]] = {
-    "Downtown Central": (17.3850, 78.4867),
-    "Old City Sector": (17.3616, 78.4747),
-    "North Industrial Ward": (17.4350, 78.4600),
-    "West Tech Corridor": (17.4400, 78.3800),
-    "East Suburbs & Highway": (17.3600, 78.5300),
-    "South Metro District": (17.3200, 78.4700),
+    "T. Nagar": (13.0418, 80.2341),
+    "George Town / Parrys": (13.0900, 80.2900),
+    "Marina Beach & Triplicane": (13.0500, 80.2824),
+    "Anna Nagar": (13.0850, 80.2101),
+    "Velachery": (12.9815, 80.2180),
+    "OMR IT Corridor": (12.9352, 80.2312),
+    "Guindy & Alandur": (13.0067, 80.2024),
+    "Adyar & Besant Nagar": (13.0012, 80.2565),
+    "Koyambedu": (13.0694, 80.1948),
+    "Tambaram": (12.9249, 80.1472),
 }
+
+DEFAULT_LOCATION = "T. Nagar"
+DEFAULT_COORDS = (13.0418, 80.2341)
 
 
 def _generate_complaint_id() -> str:
@@ -73,11 +80,11 @@ def sync_counter_from_existing() -> None:
 
 
 def get_zone_coordinates(zone_name: str) -> Tuple[float, float]:
-    """Get latitude and longitude for a given zone with slight jitter to prevent pin stacking."""
-    base = ZONE_COORDINATES.get(zone_name, (17.3850, 78.4867))
+    """Get latitude and longitude for a given Chennai zone with slight jitter to prevent pin overlap."""
+    base = ZONE_COORDINATES.get(zone_name, DEFAULT_COORDS)
     # Small jitter ~ 100-300m
-    lat = round(base[0] + random.uniform(-0.006, 0.006), 6)
-    lon = round(base[1] + random.uniform(-0.006, 0.006), 6)
+    lat = round(base[0] + random.uniform(-0.005, 0.005), 6)
+    lon = round(base[1] + random.uniform(-0.005, 0.005), 6)
     return (lat, lon)
 
 
@@ -86,24 +93,23 @@ def register_complaint(
     category: str,
     description: str,
     priority: str = DEFAULT_PRIORITY,
-    location: str = "Downtown Central",
+    location: str = DEFAULT_LOCATION,
     latitude: Optional[float] = None,
     longitude: Optional[float] = None,
 ) -> str:
-    """Register a new complaint or criminal incident.
+    """Register a new complaint or criminal incident in Chennai.
 
-    Validates and normalizes inputs. If the complaint pertains to severe crimes
-    (e.g., Murder, Rape, Armed Robbery), it is automatically tagged as critical
-    and elevated to HIGH priority for rapid law enforcement response.
+    Validates and normalizes inputs. Severe violent crimes (Murder, Rape, Armed Robbery)
+    are automatically escalated to HIGH priority for Chennai City Police units.
 
     Args:
         name: Name of complainant / reporting citizen.
         category: Incident category.
-        description: Incident details & location description.
+        description: Incident details & landmark description.
         priority: Initial priority level ('LOW', 'MEDIUM', 'HIGH').
-        location: Geographic municipal zone name.
-        latitude: Optional explicit GPS latitude.
-        longitude: Optional explicit GPS longitude.
+        location: Chennai locality / zone name.
+        latitude: GPS latitude in Chennai.
+        longitude: GPS longitude in Chennai.
 
     Returns:
         The generated Complaint ID (e.g. 'CMP1001').
@@ -111,7 +117,7 @@ def register_complaint(
     cleaned_name = str(name).strip().title()
     cleaned_category = str(category).strip().title()
     cleaned_description = str(description).strip()
-    cleaned_location = str(location).strip().title() if location else "Downtown Central"
+    cleaned_location = str(location).strip() if location else DEFAULT_LOCATION
 
     if not cleaned_name:
         raise ValueError("Complainant name cannot be empty.")
@@ -120,7 +126,7 @@ def register_complaint(
     if not cleaned_description:
         raise ValueError("Complaint description cannot be empty.")
 
-    # Check for Critical Severe Crimes (Rape, Murder, Violent Assault)
+    # Check for Critical Severe Crimes
     desc_lower = cleaned_description.lower()
     is_critical_crime = (
         category_manager.is_critical_crime_category(cleaned_category)
@@ -129,17 +135,15 @@ def register_complaint(
     )
 
     if is_critical_crime:
-        # Mandatory emergency escalation for severe violent crime
         normalized_priority = "HIGH"
     else:
         normalized_priority = str(priority).strip().upper()
         if normalized_priority not in VALID_PRIORITIES:
             normalized_priority = DEFAULT_PRIORITY
 
-    # Route department
     department = category_manager.get_department(cleaned_category)
 
-    # Assign coordinates
+    # Assign Chennai GPS coordinates
     if latitude is None or longitude is None:
         lat, lon = get_zone_coordinates(cleaned_location)
     else:

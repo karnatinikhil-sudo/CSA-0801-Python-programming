@@ -1,0 +1,12 @@
+# Digital Complaint Registration and Tracking System
+# Requirements Specification
+
+# No external dependencies — Python 3.9+ standard library only
+# Standard modules utilized:
+# - csv: Structured tabular data persistence and loading
+# - datetime: Timestamps, registration/resolution date arithmetic
+# - json: Safe serialization of status history timeline within CSV records
+# - os: Directory and file path handling
+# - sys: Command line execution and IO streams
+# - typing: Static type hinting (Dict, List, Tuple, Optional, Any)
+# - unittest: Built-in automated test runner framework
